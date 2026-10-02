@@ -1,0 +1,37 @@
+.categories-section {
+  padding: var(--space-12) var(--space-4);
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-6);
+}
+
+.category-card {
+  background-color: var(--color-bg-card);
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-accent);
+}
+
+.category-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-3);
+}
+
+.category-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
