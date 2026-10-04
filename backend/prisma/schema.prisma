@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------------------------------------
+// EPIC-CART DATABASE MODELS
+// -------------------------------------------------
+
+// The Category model represents a grouping of products (e.g., "Electronics", "Clothing").
+// One Category can have many Products (1-to-Many relationship).
+model Category {
+  id          Int       @id @default(autoincrement()) // Primary Key
+  name        String    @unique                       // Categories must have unique names
+  description String?                                 // Optional description (notice the '?')
+  createdAt   DateTime  @default(now())               // Automatically record when created
+  updatedAt   DateTime  @updatedAt                    // Automatically record when updated
+  
+  // This defines the "Many" side of the 1-to-Many relationship
+  products    Product[]
+}
+
+// The Product model represents an item being sold in the store.
+// Many Products can belong to One Category.
+model Product {
+  id          Int       @id @default(autoincrement()) // Primary Key
+  name        String                                  
+  description String
+  price       Float                                   // Floating point number for currency
+  stock       Int       @default(0)                   // Inventory tracking
+  imageUrl    String?                                 // Optional product image URL
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Foreign Key relationship connecting the Product to a Category
+  categoryId  Int
+  category    Category  @relation(fields: [categoryId], references: [id])
+}
