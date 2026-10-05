@@ -43,3 +43,13 @@ model Product {
   categoryId  Int
   category    Category  @relation(fields: [categoryId], references: [id])
 }
+
+// The User model represents a registered customer.
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String   // Will store a securely hashed password, never plain text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

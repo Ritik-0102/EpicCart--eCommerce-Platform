@@ -20,6 +20,34 @@ EpicCart is a modern, responsive, full-stack e-commerce platform built with a fo
 
 ## Daily Progress Log
 
+### Day 8: Authentication & Security
+- **Completed Work:**
+  - Expanded the database schema (`schema.prisma`) with a secure `User` model.
+  - Implemented the `authController.js` and `authRoutes.js` for `POST /api/auth/register`, `POST /api/auth/login`, and the protected `GET /api/auth/profile`.
+  - Secured passwords by automatically hashing them with **bcrypt** (`bcryptjs`) before saving to the database.
+  - Implemented stateless authentication using **JSON Web Tokens (JWT)** (`jsonwebtoken`).
+  - Created the `protect` middleware to mathematically verify incoming JWTs via the HTTP `Authorization: Bearer <token>` header, effectively blocking unauthorized access to protected routes.
+  - Built out the Frontend interface with `Login`, `Register`, and `Account` React pages.
+  - Implemented a global React Context (`AuthContext.jsx`) backed by `localStorage` to persist the user's logged-in state across page reloads.
+  - Wired up dynamic Navigation logic (changing "Login" to the User's first name upon successful login).
+- **Files Created:**
+  - `backend/middleware/authMiddleware.js`
+  - `backend/controllers/authController.js`
+  - `backend/routes/authRoutes.js`
+  - `frontend/src/context/AuthContext.jsx`
+  - `frontend/src/pages/Login.jsx`, `Register.jsx`, `Account.jsx`, and `Auth.css`
+- **Files Modified:**
+  - `backend/prisma/schema.prisma` (Added User model)
+  - `backend/app.js` (Mounted auth routes)
+  - `frontend/src/services/api.js` (Added auth fetch wrappers)
+  - `frontend/src/App.jsx` (Wrapped app in `<AuthProvider>`)
+  - `frontend/src/components/layout/Navbar.jsx` (Added dynamic auth state UI)
+  - `Project - Documentation.md`
+- **Security Considerations Implemented:**
+  - **No Plaintext Passwords:** Passwords are mathematically transformed using bcrypt salts and hashes. Even if the database is compromised, the actual passwords remain secure.
+  - **No Secrets on Frontend:** The `JWT_SECRET` lives strictly in the backend `.env` file. The frontend only receives the mathematical output (the token).
+  - **Stateless Tokens:** The server doesn't have to look up the token in a database table every request; it simply verifies the cryptographic signature, making the system highly scalable.
+
 ### Day 7: Product Discovery & Routing
 - **Completed Work:**
   - Upgraded the Backend `GET /api/products` endpoint to support advanced query parameters: `?search=...&category=...&sort=...&page=...&limit=...`.
