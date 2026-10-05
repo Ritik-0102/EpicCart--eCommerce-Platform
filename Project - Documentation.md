@@ -20,6 +20,30 @@ EpicCart is a modern, responsive, full-stack e-commerce platform built with a fo
 
 ## Daily Progress Log
 
+### Day 5: Product and Category APIs
+- **Completed Work:**
+  - Implemented structured backend routes and controllers for Categories and Products.
+  - Added the following Category endpoints:
+    - `GET /api/categories` - Fetch all categories.
+    - `GET /api/categories/:id` - Fetch a category by ID (includes its products).
+  - Added the following Product endpoints:
+    - `GET /api/products` - Fetch all products (includes category details).
+    - `GET /api/products/:id` - Fetch product by ID.
+    - `POST /api/products` - Create a new product. (Includes body validation).
+    - `PUT /api/products/:id` - Update an existing product.
+    - `DELETE /api/products/:id` - Delete a product.
+  - Linked all controllers to Prisma for actual database operations.
+  - Enforced graceful error handling via the `try/catch` and `next(error)` pattern.
+- **Files Created:**
+  - `backend/controllers/categoryController.js`
+  - `backend/controllers/productController.js`
+  - `backend/routes/categoryRoutes.js`
+  - `backend/routes/productRoutes.js`
+- **Files Modified:**
+  - `backend/app.js` (Mounted the newly created routers)
+  - `Project - Documentation.md`
+- **Known Issues:** As in Day 4, until PostgreSQL is running locally, the endpoints will return a `500 Internal Server Error` due to Prisma connection failure. However, basic validation (`400 Bad Request`) operates successfully.
+
 ### Day 4: Database Setup & Prisma ORM
 - **Completed Work:**
   - Installed Prisma and `@prisma/client`.

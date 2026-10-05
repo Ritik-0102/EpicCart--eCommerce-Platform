@@ -9,7 +9,15 @@ const app = express();
 app.use(express.json());
 
 
+// --- ROUTE IMPORTS ---
+const categoryRoutes = require('./routes/categoryRoutes');
+const productRoutes = require('./routes/productRoutes');
+
 // --- ROUTES ---
+// Mount the category and product routes
+app.use('/api/categories', categoryRoutes);
+app.use('/api/products', productRoutes);
+
 // Health Check Endpoint
 // Purpose: A simple route to verify that our API is up and running.
 app.get('/api/health', (req, res) => {
