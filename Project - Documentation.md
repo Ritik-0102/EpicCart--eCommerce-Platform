@@ -20,6 +20,43 @@ EpicCart is a modern, responsive, full-stack e-commerce platform built with a fo
 
 ## Daily Progress Log
 
+### Day 4: Database Setup & Prisma ORM
+- **Completed Work:**
+  - Installed Prisma and `@prisma/client`.
+  - Configured `schema.prisma` to use the PostgreSQL provider.
+  - Defined the `Category` and `Product` models with a 1-to-Many relational link.
+  - Drafted the migration schema including attributes like `@id`, `@default(autoincrement())`, and `@relation`.
+  - Created a database seed script (`prisma/seed.js`) with sample categories and products using `prisma.category.upsert` and `prisma.product.create`.
+  - Configured the Prisma seed command in `package.json`.
+  - Added the `DATABASE_URL` environment variable to `.env` and `.env.example`.
+- **Files Created:**
+  - `backend/prisma/schema.prisma` (Database schema definitions)
+  - `backend/prisma/seed.js` (Seed script for mock data)
+- **Files Modified:**
+  - `backend/package.json` (Added Prisma dependencies and seed configuration)
+  - `backend/.env` & `backend/.env.example` (Added PostgreSQL connection string)
+  - `Project - Documentation.md`
+- **Known Issues:** The local environment does not currently have a running PostgreSQL instance on `localhost:5432`. The `npx prisma migrate dev` command fails with `P1001: Can't reach database server`. The database must be installed and running locally to complete the migration and seeding.
+
+### Day 3: Backend Fundamentals
+- **Completed Work:**
+  - Refactored the backend to separate the Express configuration (`app.js`) from the server entry point (`server.js`).
+  - Implemented environment variable management using the `dotenv` package. Created `.env` and `.env.example` templates.
+  - Added essential middleware including `express.json()` to automatically parse incoming JSON payloads.
+  - Constructed a `/api/health` endpoint for monitoring backend stability.
+  - Configured a catch-all 404 middleware for invalid routes.
+  - Integrated centralized error handling middleware to cleanly process and format application errors.
+  - Set up `nodemon` for auto-restarting the server during active development.
+- **Files Created:**
+  - `backend/app.js` (Express configuration)
+  - `backend/.env` (Local secrets)
+  - `backend/.env.example` (Template for required secrets)
+- **Files Modified:**
+  - `backend/server.js` (Simplified to import from app.js)
+  - `backend/package.json` (Added `dev` script for nodemon)
+  - `Project - Documentation.md`
+- **Known Issues:** The backend currently does not interact with a database. It simply processes basic requests.
+
 ### Day 2: UI Foundation and Homepage
 - **Completed Work:**
   - Established a design system via CSS variables (`index.css`) outlining typography, spacing, and a modern primary/accent color palette.
