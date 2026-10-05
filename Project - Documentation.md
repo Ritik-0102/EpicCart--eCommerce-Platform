@@ -20,6 +20,26 @@ EpicCart is a modern, responsive, full-stack e-commerce platform built with a fo
 
 ## Daily Progress Log
 
+### Day 11: Payment Integration (Razorpay)
+- **Completed Work:**
+  - Integrated the `razorpay` Node.js SDK and added test API keys into backend environment variables (`.env`).
+  - Implemented the `/api/payments/initiate` endpoint to generate a verified Razorpay Order ID corresponding to an EpicCart `PENDING` order.
+  - Implemented the `/api/payments/verify` endpoint to cryptographically verify incoming payment signatures using `crypto.createHmac` and SHA256.
+  - Guarded the Order status: The system only updates an order's status to `PAID` if the webhook/signature verification mathematically proves the payment was successfully processed by Razorpay.
+  - Integrated the official Razorpay Checkout script dynamically on the frontend (`OrderDetails.jsx`).
+  - Added explicit user feedback states (Payment Processing, Payment Success, Payment Failed) on the frontend.
+  - Refined the Prisma schema to persist tracking variables: `razorpayOrderId`, `razorpayPaymentId`, and `razorpaySignature`.
+- **Files Created:**
+  - `backend/controllers/paymentController.js`
+  - `backend/routes/paymentRoutes.js`
+- **Files Modified:**
+  - `backend/prisma/schema.prisma` (Added Razorpay tracking fields to `Order`)
+  - `backend/app.js` (Mounted `/api/payments`)
+  - `frontend/src/services/api.js` (Added payment initiation and verification calls)
+  - `frontend/src/pages/OrderDetails.jsx` & `OrderDetails.css` (Added Checkout UI and status messages)
+  - `Project - Documentation.md` (Updated logs)
+- **Security Checkpoint (Payment Integrity):** Never trust frontend assertions like "Payment successful!". An attacker can easily spoof a network response. The backend recalculates the HMAC hex digest combining `razorpay_order_id` and `razorpay_payment_id` using the secret key, guaranteeing that Razorpay itself authorized the transaction.
+
 ### Day 10: Checkout and Order Management
 - **Completed Work:**
   - Expanded the database schema with `Order`, `OrderItem`, and `Coupon` models to record immutable snapshots of purchases.
