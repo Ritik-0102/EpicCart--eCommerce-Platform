@@ -1,9 +1,13 @@
 const express = require('express');
+const cors = require('cors');
 
 // Initialize the Express application
 const app = express();
 
 // --- MIDDLEWARE ---
+// Enable CORS for all routes (allows frontend to fetch data)
+app.use(cors());
+
 // Middleware to parse incoming JSON requests.
 // Without this, req.body would be undefined when clients send JSON data.
 app.use(express.json());

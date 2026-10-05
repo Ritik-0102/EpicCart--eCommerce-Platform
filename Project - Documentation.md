@@ -20,6 +20,23 @@ EpicCart is a modern, responsive, full-stack e-commerce platform built with a fo
 
 ## Daily Progress Log
 
+### Day 6: Frontend and Backend Integration
+- **Completed Work:**
+  - Configured Cross-Origin Resource Sharing (`cors`) in the backend to allow requests from the React frontend.
+  - Setup environment variables on the frontend (`.env`, `VITE_API_URL`) to securely store the backend URL.
+  - Created a reusable API service layer (`frontend/src/services/api.js`) using the `fetch` API for modularity.
+  - Refactored `Categories.jsx` and `FeaturedProducts.jsx` to swap static mock data with real React `useState` and `useEffect` API fetching.
+  - Implemented resilient UI components capable of rendering Loading states, Error states, Empty states, and the final Data state.
+- **Files Created:**
+  - `frontend/.env` & `frontend/.env.example`
+  - `frontend/src/services/api.js`
+- **Files Modified:**
+  - `backend/app.js` (Added CORS middleware)
+  - `frontend/src/components/home/Categories.jsx` & `Categories.css`
+  - `frontend/src/components/home/FeaturedProducts.jsx`
+  - `Project - Documentation.md`
+- **Known Issues:** The frontend is successfully wired up to the backend. However, because the local PostgreSQL database is still offline, the UI accurately catches the backend's `500` error and displays the user-friendly "Failed to load products/categories" error state as designed.
+
 ### Day 5: Product and Category APIs
 - **Completed Work:**
   - Implemented structured backend routes and controllers for Categories and Products.

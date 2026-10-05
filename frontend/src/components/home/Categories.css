@@ -35,3 +35,40 @@
   font-weight: 600;
   color: var(--color-text-main);
 }
+
+/* API Status States */
+.status-message {
+  text-align: center;
+  padding: var(--space-8);
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-4);
+}
+
+.status-message.loading {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.status-message.error {
+  background-color: #fef2f2;
+  color: var(--color-danger);
+  border: 1px solid #fecaca;
+}
+
+.error-details {
+  font-size: 0.875rem;
+  margin-top: var(--space-2);
+  font-family: monospace;
+}
+
+.error-hint {
+  font-size: 0.875rem;
+  margin-top: var(--space-2);
+  color: #991b1b;
+}
+
+.status-message.empty {
+  background-color: var(--color-bg-card);
+  color: var(--color-text-muted);
+  border: 1px dashed var(--color-border);
+}
