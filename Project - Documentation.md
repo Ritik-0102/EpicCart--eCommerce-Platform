@@ -20,6 +20,28 @@ EpicCart is a modern, responsive, full-stack e-commerce platform built with a fo
 
 ## Daily Progress Log
 
+### Day 7: Product Discovery & Routing
+- **Completed Work:**
+  - Upgraded the Backend `GET /api/products` endpoint to support advanced query parameters: `?search=...&category=...&sort=...&page=...&limit=...`.
+  - Configured Prisma in the controller to dynamically build SQL `WHERE`, `ORDER BY`, `SKIP`, and `TAKE` clauses based on incoming query strings.
+  - Installed `react-router-dom` in the frontend to transform EpicCart into a Single Page Application (SPA).
+  - Created the **Product Discovery** page (`Shop.jsx`) featuring keyword search, category filtering, price sorting, and pagination logic.
+  - Created the **Product Details** page (`ProductDetails.jsx`) to fetch and display deep information (images, price, stock, description) based on the URL parameter (`/products/:id`).
+  - Implemented dynamic 404 "Not Found" error states for invalid Product IDs.
+  - Replaced standard `<a>` tags with React Router `<Link>` components to prevent full-page refreshes.
+- **Files Created:**
+  - `frontend/src/pages/Home.jsx`
+  - `frontend/src/pages/Shop.jsx` & `Shop.css`
+  - `frontend/src/pages/ProductDetails.jsx` & `ProductDetails.css`
+- **Files Modified:**
+  - `backend/controllers/productController.js`
+  - `frontend/src/services/api.js`
+  - `frontend/src/App.jsx`
+  - `frontend/src/components/layout/Navbar.jsx`
+  - `frontend/src/components/home/FeaturedProducts.jsx`
+  - `Project - Documentation.md`
+- **Known Issues:** UI renders error states elegantly as PostgreSQL remains unconfigured locally, blocking data hydration.
+
 ### Day 6: Frontend and Backend Integration
 - **Completed Work:**
   - Configured Cross-Origin Resource Sharing (`cors`) in the backend to allow requests from the React frontend.
