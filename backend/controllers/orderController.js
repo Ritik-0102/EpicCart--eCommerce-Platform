@@ -192,6 +192,19 @@ const createOrder = async (req, res, next) => {
       return newOrder;
     });
 
+    // Send email notification (Fail-safe, shouldn't crash order creation)
+    try {
+      const sendEmail = require('../utils/sendEmail');
+      await sendEmail({
+        email: req.user.email,
+        subject: `Order Confirmation - ${order.id}`,
+        message: `Thank you for your order, ${req.user.name}!\n\nYour order ID is ${order.id}.\nTotal amount: $${order.total}\n\nWe will notify you once it ships.`,
+        html: `<h2>Thank you for your order, ${req.user.name}!</h2><p>Your order ID is <strong>${order.id}</strong>.</p><p>Total amount: $${order.total}</p><p>We will notify you once it ships.</p>`
+      });
+    } catch (emailError) {
+      console.error('Email could not be sent:', emailError);
+    }
+
     res.status(201).json({
       success: true,
       message: 'Order created successfully',

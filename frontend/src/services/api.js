@@ -318,3 +318,108 @@ export const verifyPayment = async (paymentData, token) => {
     throw error;
   }
 };
+
+/**
+ * --- ADMIN API CALLS ---
+ */
+
+export const fetchAdminSummary = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/summary`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch admin summary');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (fetchAdminSummary):', error);
+    throw error;
+  }
+};
+
+export const fetchAllOrders = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/orders`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch all orders');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (fetchAllOrders):', error);
+    throw error;
+  }
+};
+
+export const updateOrderStatus = async (orderId, status, token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/orders/${orderId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ status })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update order status');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (updateOrderStatus):', error);
+    throw error;
+  }
+};
+
+export const updateProductStock = async (productId, stock, token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/products/${productId}/stock`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ stock })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update product stock');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (updateProductStock):', error);
+    throw error;
+  }
+};
+
+/**
+ * --- REVIEWS API ---
+ */
+
+export const fetchProductReviews = async (productId) => {
+  try {
+    const response = await fetch(`${API_URL}/products/${productId}/reviews`);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch reviews');
+    return data; // Returns data, avgRating, totalReviews
+  } catch (error) {
+    console.error('API Error (fetchProductReviews):', error);
+    throw error;
+  }
+};
+
+export const createProductReview = async (productId, reviewData, token) => {
+  try {
+    const response = await fetch(`${API_URL}/products/${productId}/reviews`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(reviewData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to submit review');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (createProductReview):', error);
+    throw error;
+  }
+};

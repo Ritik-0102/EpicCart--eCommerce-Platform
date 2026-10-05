@@ -242,3 +242,61 @@ EpicCart is a modern, responsive, full-stack e-commerce platform built with a fo
 - **Known Issues:** None. Ready for Day 2.
 
 
+
+## Day 12: Admin Dashboard
+
+### Roles and Permissions
+We have introduced a role-based access control (RBAC) system. The `User` model now includes a `Role` field, which can be either `USER` or `ADMIN`.
+- **Authentication**: The process of verifying a user's identity (e.g., logging in with email and password). It answers the question, "Who are you?".
+- **Authorization**: The process of verifying what a specific user has access to. It answers the question, "Are you allowed to do this?". For example, an authenticated user might not be authorized to view the admin dashboard unless their role is `ADMIN`.
+
+We use a custom `admin` middleware in `authMiddleware.js` to ensure that only users with the `ADMIN` role can access sensitive endpoints.
+
+### Admin Endpoints
+- **GET `/api/admin/summary`**: Fetches a high-level summary (total products, orders, users).
+- **GET `/api/admin/orders`**: Fetches all orders from all users across the platform.
+- **PUT `/api/admin/orders/:id/status`**: Updates the fulfillment status of an order (e.g., PENDING -> SHIPPED).
+- **PUT `/api/admin/products/:id/stock`**: Updates the inventory stock level of a specific product.
+- **POST/PUT/DELETE `/api/products` & `/api/categories`**: These generic creation/modification endpoints are now protected by the `admin` authorization middleware.
+
+### Frontend Integration
+- Added an `AdminDashboard` with summary metrics.
+- Added `AdminProducts` for updating inventory inline.
+- Added `AdminOrders` for viewing all orders and updating their fulfillment status.
+- Added dynamic navigation link in the `Navbar` to display the "Admin" section only for authorized users.
+
+## Day 13: Reviews, Notifications, and UI Polish
+
+### Features and Implementation
+1. **Product Reviews & Ratings**: 
+   - Introduced a `Review` model in Prisma.
+   - Built backend endpoints `POST /api/products/:id/reviews` (protected route) and `GET /api/products/:id/reviews` to manage product reviews.
+   - The system calculates the `averageRating` on the fly.
+   - Implemented an interactive UI on the `ProductDetails` page that renders loading skeletons, existing reviews, and a form to submit new reviews if the user is authenticated.
+
+2. **Email Notifications**:
+   - Integrated `nodemailer` to dispatch order confirmation emails asynchronously upon successful checkout.
+   - Designed to run non-blockingly and wrapped in a try/catch block so as not to interrupt the order flow in case of email delivery failure.
+   - Requires `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_USER`, and `EMAIL_PASS` in the `.env` file (currently using mailtrap configuration).
+
+3. **UI Polish & Toast Notifications**:
+   - Replaced native browser `alert()` usage with `react-hot-toast` for consistent, modern, and non-blocking notification alerts (`toast.success` and `toast.error`).
+   - Integrated loading skeletons into the UI, specifically the `ProductDetails` page, to prevent layout shift and offer a better user experience.
+   - Ensured empty states are handled gracefully across `Cart`, `Checkout`, and `Orders` pages.
+
+## Day 14: PWA and Responsive Optimization
+
+### PWA Architecture and Limitations
+- **Progressive Web App (PWA):** Web applications built to act like native apps on mobile and desktop. They can be installed directly from the browser to the home screen or app launcher without going through an app store.
+- **Web App Manifest:** A JSON file (`manifest.webmanifest`) that informs the browser about the app's metadata, such as its name, icons (e.g., maskable icons for Android), display mode (standalone), and theme colors. This triggers the "Add to Home Screen" prompt on supported browsers.
+- **Service Worker:** A background JavaScript script acting as a network proxy. It intercepts requests and serves cached resources. We implemented it using `vite-plugin-pwa` combined with Workbox. 
+- **Caching Strategy:**
+  - **Static Assets:** Cached using a `CacheFirst` strategy (e.g., Unsplash images) to improve load times and enable offline UI rendering.
+  - **API Requests:** We employed a `NetworkFirst` strategy for `/api/products` and `/api/categories`.
+  - **Security Considerations:** We **did not** aggressively cache sensitive, authenticated endpoints (like `/api/cart` or `/api/orders`) to prevent stale or secure data from persisting improperly in the service worker cache.
+- **Limitations:** While PWAs are excellent for fast loads and cross-platform installation, iOS Safari's support for PWAs and Push Notifications remains slightly more restrictive than Android/Chrome. Furthermore, advanced offline functionality (like offline cart syncing) requires complex IndexedDB state management, which is deferred to prevent unnecessary complexity.
+
+### Responsive Optimization
+- **Touch Targets:** Updated padding and `min-height: 44px` across navigation icons, buttons, and inputs to align with iOS and Android accessibility guidelines for comfortable touch interaction.
+- **Overflow Prevention:** Ensured `overflow-x: hidden` prevents horizontal scrolling breaks on mobile viewports.
+- **Navigation:** Updated the mobile menu to effectively integrate React Router (`Link`) to ensure true SPA routing without full page reloads, a prerequisite for feeling like a native application.

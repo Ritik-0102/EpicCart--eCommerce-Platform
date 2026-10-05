@@ -84,6 +84,7 @@ button {
   border-radius: var(--radius-md);
   font-weight: 500;
   transition: all 0.2s ease;
+  min-height: 44px; /* Improve touch target size for mobile */
 }
 
 .btn-primary {
@@ -110,4 +111,12 @@ button {
   font-weight: 700;
   margin-bottom: var(--space-6);
   text-align: center;
+}
+
+/* Touch targets for inputs */
+input, select, textarea {
+  min-height: 44px;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border);
 }

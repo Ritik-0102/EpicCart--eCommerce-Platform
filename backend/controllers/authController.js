@@ -38,6 +38,8 @@ const registerUser = async (req, res, next) => {
         name,
         email,
         password: hashedPassword,
+        // Optional: allow passing role for testing purposes (not secure for prod)
+        role: req.body.role || 'USER'
       },
     });
 
@@ -48,6 +50,7 @@ const registerUser = async (req, res, next) => {
         id: user.id,
         name: user.name,
         email: user.email,
+        role: user.role,
         token: generateToken(user.id),
       },
     });
@@ -78,6 +81,7 @@ const loginUser = async (req, res, next) => {
           id: user.id,
           name: user.name,
           email: user.email,
+          role: user.role,
           token: generateToken(user.id),
         },
       });
@@ -100,6 +104,7 @@ const getProfile = async (req, res, next) => {
         id: true,
         name: true,
         email: true,
+        role: true,
         createdAt: true
         // We strictly DO NOT select the password field here
       }

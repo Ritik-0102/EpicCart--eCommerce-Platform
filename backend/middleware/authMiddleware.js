@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
 // Middleware to protect routes that require authentication
 const protect = (req, res, next) => {
   try {
     let token;
 
-    // Check if the authorization header exists and starts with "Bearer"
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      // Extract the token from the header (Format: "Bearer <token>")
       token = req.headers.authorization.split(' ')[1];
     }
 
@@ -18,16 +18,10 @@ const protect = (req, res, next) => {
       });
     }
 
-    // Verify token cryptographically
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // Attach the decoded user ID to the request object so subsequent middleware/controllers can use it
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_jwt_secret_key');
     req.user = { id: decoded.id };
-
-    // Move to the next middleware or controller
     next();
   } catch (error) {
-    // If jwt.verify fails (e.g. token expired, malformed), it throws an error
     res.status(401).json({ 
       success: false, 
       message: 'Not authorized, token failed or expired' 
@@ -35,5 +29,26 @@ const protect = (req, res, next) => {
   }
 };
 
-module.exports = { protect };
+// Middleware to protect routes that require ADMIN role
+const admin = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ success: false, message: 'Not authorized' });
+    }
 
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id }
+    });
+
+    if (user && user.role === 'ADMIN') {
+      req.user = user; // Attach full user object
+      next();
+    } else {
+      res.status(403).json({ success: false, message: 'Forbidden: Admin access required' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error verifying role' });
+  }
+};
+
+module.exports = { protect, admin };

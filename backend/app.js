@@ -22,6 +22,8 @@ const wishlistRoutes = require('./routes/wishlistRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 
+const adminRoutes = require('./routes/adminRoutes');
+
 // --- ROUTES ---
 // Mount the category and product routes
 app.use('/api/categories', categoryRoutes);
@@ -31,6 +33,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health Check Endpoint
 // Purpose: A simple route to verify that our API is up and running.
