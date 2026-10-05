@@ -20,6 +20,52 @@ EpicCart is a modern, responsive, full-stack e-commerce platform built with a fo
 
 ## Daily Progress Log
 
+### Day 10: Checkout and Order Management
+- **Completed Work:**
+  - Expanded the database schema with `Order`, `OrderItem`, and `Coupon` models to record immutable snapshots of purchases.
+  - Implemented the Order status cycle (`PENDING`, `PAID`, `SHIPPED`, `DELIVERED`, `CANCELLED`).
+  - Built out the backend checkout system securely recalculating cart totals against real database product prices, completely ignoring any price claims from the frontend to prevent tampering.
+  - Added backend support for Coupon application, securely applying discounts to server-side totals.
+  - Utilized Prisma `$transaction` API to ensure that Order Creation, Inventory (stock) decrementing, and Cart clearing only execute atomically (if one step fails, everything rolls back).
+  - Designed the `Checkout` UI, allowing users to enter a shipping address, review dynamic summary, and apply a coupon before confirming the order.
+  - Developed the `Orders` (Order History) and `OrderDetails` pages to let users track their past purchases securely.
+- **Files Created:**
+  - `backend/controllers/orderController.js`
+  - `backend/routes/orderRoutes.js`
+  - `frontend/src/pages/Checkout.jsx` & `Checkout.css`
+  - `frontend/src/pages/Orders.jsx` & `Orders.css`
+  - `frontend/src/pages/OrderDetails.jsx` & `OrderDetails.css`
+- **Files Modified:**
+  - `backend/prisma/schema.prisma` (Added Order, OrderItem, and Coupon models)
+  - `backend/app.js` (Mounted new protected order routes)
+  - `frontend/src/services/api.js` (Added order checkout and history endpoints)
+  - `frontend/src/App.jsx` (Registered Checkout and Order UI routes)
+  - `frontend/src/pages/Cart.jsx` (Connected Proceed to Checkout button)
+  - `frontend/src/pages/Account.jsx` (Added button for Order History)
+- **Security Checkpoint (Transaction Safety):** Totals calculation is strictly isolated on the backend. When an order is placed, `productName` and `price` are snapshotted in the `OrderItem` row so historical receipts are not altered if a product price changes months later.
+
+### Day 9: Cart and Wishlist
+- **Completed Work:**
+  - Expanded the database schema with `Cart`, `CartItem`, `Wishlist`, and `WishlistItem` models, establishing relationships with `User` and `Product`.
+  - Created backend controllers (`cartController.js`, `wishlistController.js`) and routes (`cartRoutes.js`, `wishlistRoutes.js`) with JWT protection.
+  - Handled critical e-commerce logic on the backend: Cart calculations (subtotals and totals) are performed dynamically on the server based on current product prices in the database, ensuring users cannot manipulate costs.
+  - Implemented the frontend `CartContext` and `WishlistContext` to manage global state and interact with the protected API endpoints.
+  - Developed the `Cart` and `Wishlist` UI pages, rendering lists of products, quantities, dynamic subtotals, and empty/loading states gracefully.
+  - Re-wrote `Navbar` and `ProductDetails` components to utilize the new context data and show dynamic badge counts and conditional "Add to Cart" / "Wishlist" buttons.
+- **Files Created:**
+  - `backend/controllers/cartController.js`, `backend/controllers/wishlistController.js`
+  - `backend/routes/cartRoutes.js`, `backend/routes/wishlistRoutes.js`
+  - `frontend/src/context/CartContext.jsx`, `frontend/src/context/WishlistContext.jsx`
+  - `frontend/src/pages/Cart.jsx`, `Cart.css`, `frontend/src/pages/Wishlist.jsx`, `Wishlist.css`
+- **Files Modified:**
+  - `backend/prisma/schema.prisma` (Added Cart and Wishlist models)
+  - `backend/app.js` (Mounted new protected routes)
+  - `frontend/src/services/api.js` (Added cart/wishlist network requests)
+  - `frontend/src/App.jsx` (Registered global context providers)
+  - `frontend/src/components/layout/Navbar.jsx`
+  - `frontend/src/pages/ProductDetails.jsx`
+- **Known Issues:** Pending a running PostgreSQL instance, interacting with the cart/wishlist gracefully errors out indicating the backend cannot process the operations.
+
 ### Day 8: Authentication & Security
 - **Completed Work:**
   - Expanded the database schema (`schema.prisma`) with a secure `User` model.
