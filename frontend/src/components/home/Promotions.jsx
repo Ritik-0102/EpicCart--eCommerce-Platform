@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { Link } from 'react-router-dom';
 import './Promotions.css';
 
 const Promotions = () => {
@@ -9,7 +10,7 @@ const Promotions = () => {
           <p className="promo-tag">Limited Time</p>
           <h2>Summer Sale</h2>
           <p>Up to 50% off on all clothing</p>
-          <button className="btn btn-outline promo-btn">Shop Sale</button>
+          <Link to="/products" className="btn btn-outline promo-btn">Shop Sale</Link>
         </div>
       </div>
       
@@ -18,7 +19,7 @@ const Promotions = () => {
           <p className="promo-tag">New Collection</p>
           <h2>Smart Home</h2>
           <p>Upgrade your living space</p>
-          <button className="btn btn-outline promo-btn">Explore</button>
+          <Link to="/products" className="btn btn-outline promo-btn">Explore</Link>
         </div>
       </div>
     </section>
@@ -26,3 +27,4 @@ const Promotions = () => {
 };
 
 export default Promotions;
+

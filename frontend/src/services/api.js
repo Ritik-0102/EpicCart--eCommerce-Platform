@@ -423,3 +423,52 @@ export const createProductReview = async (productId, reviewData, token) => {
     throw error;
   }
 };
+/**
+ * --- AUTHENTICATION API CALLS ---
+ */
+
+export const registerUser = async (userData) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Registration failed');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (registerUser):', error);
+    throw error;
+  }
+};
+
+export const loginUser = async (credentials) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Login failed');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (loginUser):', error);
+    throw error;
+  }
+};
+
+export const fetchProfile = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/profile`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch profile');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (fetchProfile):', error);
+    throw error;
+  }
+};

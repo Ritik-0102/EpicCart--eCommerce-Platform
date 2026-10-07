@@ -376,3 +376,15 @@ EpicCart has evolved from a static HTML prototype into a fully functional, conta
   - Frontend: `https://epiccart.vercel.app`
   - Backend: `https://epiccart-backend.onrender.com`
 
+
+### Day 16: Complete Production Functionality Repair (Post-Deployment)
+- **Root Cause Identified**: The Vercel frontend was behaving like a static homepage because the React Router implementation (<Routes>) was missing entirely from App.jsx. All URLs fell back to index.html which statically rendered the home components.
+- **Fixes Applied**:
+  - Wrapped main.jsx with <BrowserRouter> and all context providers (AuthProvider, CartProvider, WishlistProvider).
+  - Rewrote App.jsx to map all existing pages using <Routes>.
+  - Converted <a href> links to <Link to> across Navbar.jsx, Footer.jsx, Hero.jsx, Promotions.jsx, Categories.jsx, and FeaturedProducts.jsx.
+  - Rewrote Shop.jsx to perform client-side filtering/sorting, parsing useSearchParams, because the backend getProducts endpoint was not built to handle query parameters.
+  - Implemented missing export functions (egisterUser, loginUser, etchProfile) in rontend/src/services/api.js.
+  - Exported loadCart in CartContext.jsx to ensure cart synchronization during checkout.
+  - Re-implemented Razorpay dynamic loading and transaction lifecycle inside OrderDetails.jsx to achieve full checkout flow.
+- **Verification**: The frontend successfully built and all component routes (/products, /cart, /wishlist, /account, /checkout, /orders, /admin) navigate properly.

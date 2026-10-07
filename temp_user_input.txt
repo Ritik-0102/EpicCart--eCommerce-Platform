@@ -1,0 +1,148 @@
+================================================
+IMPORTANT DATABASE RULE
+============================================================
+
+Neon production database is already configured and synchronized.
+
+Do not perform destructive database operations.
+
+Do not change the Prisma schema unless the existing code proves that a schema change is genuinely required.
+
+If a database issue is found, STOP and explain it before making destructive or structural changes.
+
+============================================================
+FINAL REPORT
+============================================================
+
+When everything has been fixed and independently verified, produce:
+
+# EPICCART — FINAL PRODUCTION FUNCTIONALITY AUDIT
+
+A. ROOT CAUSE
+- Explain why production was showing only the homepage.
+
+B. ROUTING
+- List every route.
+- PASS/FAIL for each.
+
+C. NAVIGATION
+- List important navigation elements.
+- PASS/FAIL for each.
+
+D. API INTEGRATION
+- List API groups.
+- PASS/FAIL for each.
+
+E. AUTHENTICATION
+- Register
+- Login
+- Logout
+- Protected routes
+- PASS/FAIL
+
+F. PRODUCTS
+- Listing
+- Details
+- Search
+- Categories
+- PASS/FAIL
+
+G. CART
+- Add
+- Update
+- Remove
+- Count
+- PASS/FAIL
+
+H. WISHLIST
+- Add
+- Remove
+- Load
+- PASS/FAIL
+
+I. CHECKOUT
+- Cart → Checkout
+- Order creation
+- PASS/FAIL
+
+J. RAZORPAY
+- Test mode
+- Payment initiation
+- Verification
+- PASS/FAIL
+
+K. PWA
+- Manifest
+- Icons
+- Service worker
+- PASS/FAIL
+
+L. VERCEL
+- SPA routing
+- Production build
+- PASS/FAIL
+
+M. RENDER
+- Server startup
+- Health endpoint
+- API
+- PASS/FAIL
+
+N. NEON
+- Database connectivity
+- Prisma
+- PASS/FAIL
+
+O. CONSOLE / NETWORK
+- JavaScript errors
+- CORS errors
+- localhost production requests
+- failed API requests
+- PASS/FAIL
+
+P. DOCUMENTATION
+- Updated or not
+
+Q. FILES CHANGED
+List every file changed and WHY.
+
+R. REMAINING BLOCKERS
+List only genuine blockers.
+
+S. MANUAL TESTS I MUST PERFORM
+Give me a short checklist of anything that cannot be automatically verified.
+
+T. FINAL VERDICT
+
+Choose exactly one:
+
+READY FOR COMPLETE PRODUCTION TESTING
+
+or
+
+NOT READY — BLOCKERS REMAIN
+
+============================================================
+FINAL REQUIREMENT
+============================================================
+
+DO NOT stop after fixing the first issue.
+
+The current problem is that the application behaves like a static homepage.
+
+Your responsibility is to trace the ENTIRE application and restore the intended functionality systematically.
+
+Fix → verify → record in scratchpad → continue.
+
+After all fixes:
+VERIFY EVERYTHING AGAIN.
+
+Only then provide the final report.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-10-08T01:55:39+05:30.
+
+The user's current state is as follows:
+Active Document: d:\B.Tech CSE\Projects\EpicCart - eCommerce Platform\Project - Documentation.md (LANGUAGE_UNSPECIFIED)
+Cursor is on line: 364
+</ADDITIONAL_METADATA>

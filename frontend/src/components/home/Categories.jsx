@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { fetchCategories } from '../../services/api';
 import './Categories.css';
 
@@ -36,7 +37,7 @@ const Categories = () => {
       {/* Error State */}
       {error && !isLoading && (
         <div className="status-message error">
-          <p>⚠️ Oops! We couldn't load the categories.</p>
+          <p>âš ï¸ Oops! We couldn't load the categories.</p>
           <p className="error-details">{error}</p>
           <p className="error-hint">If this is a local environment, ensure your PostgreSQL database is running.</p>
         </div>
@@ -53,11 +54,11 @@ const Categories = () => {
       {!isLoading && !error && categories.length > 0 && (
         <div className="categories-grid">
           {categories.map((category) => (
-            <div key={category.id} className="category-card">
+            <Link to={`/products?category=${category.slug || category.name.toLowerCase()}`} key={category.id} className="category-card">
               {/* Fallback icon if the database doesn't supply one */}
-              <div className="category-icon">{category.icon || '📦'}</div>
+              <div className="category-icon">{category.icon || 'ðŸ“¦'}</div>
               <h3 className="category-name">{category.name}</h3>
-            </div>
+            </Link>
           ))}
         </div>
       )}
@@ -66,3 +67,6 @@ const Categories = () => {
 };
 
 export default Categories;
+
+
+

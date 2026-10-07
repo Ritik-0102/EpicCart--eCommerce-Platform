@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { Link } from 'react-router-dom';
 import { featuredProducts } from '../../data/mockData';
 import './FeaturedProducts.css';
 
@@ -7,7 +8,7 @@ const FeaturedProducts = () => {
     <section className="featured-section container">
       <div className="section-header">
         <h2 className="section-title">Featured Products</h2>
-        <a href="#all" className="view-all">View All ➔</a>
+        <Link to="/products" className="view-all">View All</Link>
       </div>
       
       <div className="products-grid">
@@ -15,14 +16,14 @@ const FeaturedProducts = () => {
           <div key={product.id} className="product-card">
             <div className="product-image-container">
               <img src={product.image} alt={product.name} className="product-image" />
-              <button className="wishlist-btn">🤍</button>
+              <button className="wishlist-btn">ðŸ¤</button>
             </div>
             
             <div className="product-info">
               <h3 className="product-name">{product.name}</h3>
               
               <div className="product-rating">
-                <span className="stars">★★★★★</span>
+                <span className="stars">â˜…â˜…â˜…â˜…â˜…</span>
                 <span className="rating-value">{product.rating}</span>
                 <span className="reviews">({product.reviews})</span>
               </div>
@@ -45,3 +46,5 @@ const FeaturedProducts = () => {
 };
 
 export default FeaturedProducts;
+
+

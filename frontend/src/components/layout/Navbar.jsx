@@ -1,78 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
+import { CartContext } from '../../context/CartContext';
+import { WishlistContext } from '../../context/WishlistContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
+
+  const { user } = useContext(AuthContext);
+  const { cartItemCount } = useContext(CartContext);
+  const { wishlistItemCount } = useContext(WishlistContext);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate('/products?search=' + encodeURIComponent(searchQuery));
+      setIsMobileMenuOpen(false);
+    }
+  };
 
   return (
     <header className="navbar-header">
-      {/* Top Banner */}
       <div className="top-banner">
         <p>Free shipping on orders over $50! Shop now.</p>
       </div>
-
-      {/* Main Navbar */}
       <div className="navbar-main container">
-        {/* Mobile Menu Toggle */}
-        <button 
-          className="mobile-menu-btn"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          ☰
-        </button>
-
-        {/* Logo */}
-        <div className="navbar-logo">
-          <a href="/">EpicCart<span>.</span></a>
-        </div>
-
-        {/* Search Bar (Desktop) */}
-        <div className="navbar-search hidden-mobile">
-          <input type="text" placeholder="Search for products, brands and more..." />
-          <button className="search-btn">🔍</button>
-        </div>
-
-        {/* Icons */}
+        <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>☰</button>
+        <div className="navbar-logo"><Link to="/">EpicCart<span>.</span></Link></div>
+        <form className="navbar-search hidden-mobile" onSubmit={handleSearch}>
+          <input type="text" placeholder="Search for products..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <button type="submit" className="search-btn">🔍</button>
+        </form>
         <div className="navbar-icons">
-          <a href="/account" className="icon-link hidden-mobile">👤 <span className="icon-text">Account</span></a>
-          <a href="/wishlist" className="icon-link hidden-mobile">❤️ <span className="icon-text">Wishlist</span></a>
-          <a href="/cart" className="icon-link cart-link">
-            🛒 <span className="icon-text">Cart</span>
-            <span className="cart-badge">2</span>
-          </a>
+          <Link to={user ? "/account" : "/login"} className="icon-link hidden-mobile">👤 <span className="icon-text">{user ? "Account" : "Login"}</span></Link>
+          <Link to="/wishlist" className="icon-link hidden-mobile">❤️ <span className="icon-text">Wishlist</span>{wishlistItemCount > 0 && <span className="cart-badge">{wishlistItemCount}</span>}</Link>
+          <Link to="/cart" className="icon-link cart-link">🛒 <span className="icon-text">Cart</span>{cartItemCount > 0 && <span className="cart-badge">{cartItemCount}</span>}</Link>
         </div>
       </div>
-
-      {/* Category Navigation (Desktop) */}
       <nav className="navbar-categories hidden-mobile">
         <div className="container category-links">
-          <a href="#electronics">Electronics</a>
-          <a href="#fashion">Fashion</a>
-          <a href="#home">Home & Living</a>
-          <a href="#sports">Sports</a>
-          <a href="#beauty">Beauty</a>
-          <a href="#deals" className="highlight-link">Deals</a>
+          <Link to="/products?category=electronics">Electronics</Link>
+          <Link to="/products?category=fashion">Fashion</Link>
+          <Link to="/products?category=home">Home & Living</Link>
+          <Link to="/products?category=sports">Sports</Link>
+          <Link to="/products?category=beauty">Beauty</Link>
+          <Link to="/products" className="highlight-link">Shop All</Link>
         </div>
       </nav>
-
-      {/* Mobile Search & Menu Dropdown */}
       {isMobileMenuOpen && (
         <div className="mobile-menu">
-          <div className="mobile-search">
-            <input type="text" placeholder="Search..." />
-            <button>🔍</button>
-          </div>
+          <form className="mobile-search" onSubmit={handleSearch}>
+            <input type="text" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+            <button type="submit">🔍</button>
+          </form>
           <nav className="mobile-nav-links">
-            <a href="#electronics">Electronics</a>
-            <a href="#fashion">Fashion</a>
-            <a href="#home">Home & Living</a>
-            <a href="/account">👤 Account</a>
-            <a href="/wishlist">❤️ Wishlist</a>
+            <Link to="/products?category=electronics" onClick={() => setIsMobileMenuOpen(false)}>Electronics</Link>
+            <Link to="/products?category=fashion" onClick={() => setIsMobileMenuOpen(false)}>Fashion</Link>
+            <Link to="/products?category=home" onClick={() => setIsMobileMenuOpen(false)}>Home & Living</Link>
+            <Link to={user ? "/account" : "/login"} onClick={() => setIsMobileMenuOpen(false)}>👤 {user ? "Account" : "Login"}</Link>
+            <Link to="/wishlist" onClick={() => setIsMobileMenuOpen(false)}>❤️ Wishlist</Link>
           </nav>
         </div>
       )}
     </header>
   );
 };
-
 export default Navbar;

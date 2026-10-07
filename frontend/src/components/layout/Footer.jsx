@@ -1,4 +1,5 @@
-import React from 'react';
+﻿import React from 'react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -13,20 +14,20 @@ const Footer = () => {
         <div className="footer-links">
           <h4>Shop</h4>
           <ul>
-            <li><a href="#electronics">Electronics</a></li>
-            <li><a href="#fashion">Fashion</a></li>
-            <li><a href="#home">Home & Living</a></li>
-            <li><a href="#offers">Special Offers</a></li>
+            <li><Link to="/products?category=electronics">Electronics</Link></li>
+            <li><Link to="/products?category=fashion">Fashion</Link></li>
+            <li><Link to="/products?category=home">Home & Living</Link></li>
+            <li><Link to="/products?category=sports">Sports</Link></li>
           </ul>
         </div>
         
         <div className="footer-links">
           <h4>Support</h4>
           <ul>
-            <li><a href="#contact">Contact Us</a></li>
-            <li><a href="#faq">FAQs</a></li>
-            <li><a href="#shipping">Shipping Info</a></li>
-            <li><a href="#returns">Returns</a></li>
+            <li><Link to="/contact">Contact Us</Link></li>
+            <li><Link to="/faq">FAQs</Link></li>
+            <li><Link to="/shipping">Shipping Info</Link></li>
+            <li><Link to="/returns">Returns</Link></li>
           </ul>
         </div>
         
@@ -51,5 +52,4 @@ const Footer = () => {
     </footer>
   );
 };
-
 export default Footer;
