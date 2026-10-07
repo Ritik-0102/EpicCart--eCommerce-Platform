@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: epiccart-db
+    environment:
+      POSTGRES_USER: epiccart_user
+      POSTGRES_PASSWORD: epiccart_password
+      POSTGRES_DB: epiccart_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: epiccart-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - DATABASE_URL=postgresql://epiccart_user:epiccart_password@db:5432/epiccart_db?schema=public
+      - JWT_SECRET=local_development_secret
+      - EMAIL_HOST=sandbox.smtp.mailtrap.io
+      - EMAIL_PORT=2525
+      - EMAIL_USER=test_user
+      - EMAIL_PASS=test_pass
+    depends_on:
+      - db
+    # In a real local scenario, you might want a command to run migrations before starting
+    command: >
+      sh -c "npx prisma migrate deploy && npm start"
+
+  frontend:
+    build: ./frontend
+    container_name: epiccart-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+
