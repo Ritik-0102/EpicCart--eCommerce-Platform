@@ -363,6 +363,16 @@ EpicCart has evolved from a static HTML prototype into a fully functional, conta
 ### Deployment Status
 - **Neon PostgreSQL**: DEPLOYED / WORKING
 - **Render Backend**: DEPLOYED / LIVE
-- **Backend API Testing**: PASSED
-- **Vercel Frontend**: NOT YET DEPLOYED
+- **Vercel Frontend**: DEPLOYED / LIVE
+
+### Post-Deployment Fixes
+- **Production CORS Issue**: The browser blocked requests from `https://epiccart.vercel.app` because the Render backend's CORS origin was defaulting to `http://localhost:5173`.
+  - **Root Cause**: The Render environment variable `FRONTEND_URL` was not correctly set to the production Vercel URL.
+  - **Fix Applied**: The backend `server.js` was already configured to use `process.env.FRONTEND_URL`. The fix requires manually updating the Render environment variable to `https://epiccart.vercel.app`.
+- **PWA Icon Issue**: The browser console reported download errors for `pwa-192x192.png` and `pwa-512x512.png`.
+  - **Root Cause**: The referenced `.png` files in `frontend/public` were empty (0 bytes).
+  - **Fix Applied**: Removed the empty PNGs and updated `vite.config.js` PWA manifest to reference the valid `favicon.svg` asset directly for all icon sizes using the `image/svg+xml` type.
+- **Production URLs**:
+  - Frontend: `https://epiccart.vercel.app`
+  - Backend: `https://epiccart-backend.onrender.com`
 
