@@ -305,7 +305,7 @@ We use a custom `admin` middleware in `authMiddleware.js` to ensure that only us
 
 ### Containerization (Docker)
 Containerization allows us to package our application and its environment so it runs identically everywhere.
-- **Docker Images:** Think of an image as a read-only blueprint or recipe. It contains the OS, libraries, and code needed to run the app. We created a `Dockerfile` for the backend (Node environment) and frontend (Nginx environment serving static React files).
+- **Docker Images:** Think of an image as a read-only blueprint or recipe. It contains the OS, libraries, and code needed to run the app. We created a `Dockerfile` for the backend and frontend. The backend specifically uses a Debian-based slim image (`node:20-bookworm-slim`) with native glibc and OpenSSL installed. This is critical for compatibility with Prisma's query engine, avoiding issues commonly encountered with Alpine Linux (musl libc).
 - **Docker Containers:** A container is a running instance of an image. If the image is a recipe, the container is the baked cake.
 - **Ports:** Ports are communication endpoints. Inside the Docker network, our backend runs on port `5000`. We map this to our host machine's port `5000` so we can access it via `localhost:5000`.
 - **Environment Variables:** These are dynamic values (like API keys or Database URLs) passed to the container at runtime. This keeps secrets out of our source code.

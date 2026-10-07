@@ -1,4 +1,7 @@
-FROM node:20-alpine
+FROM node:20-bookworm-slim
+
+# Install OpenSSL (required by Prisma)
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
 
 # Create app directory
 WORKDIR /usr/src/app
