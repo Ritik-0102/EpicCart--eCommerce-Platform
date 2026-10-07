@@ -361,8 +361,8 @@ EpicCart has evolved from a static HTML prototype into a fully functional, conta
 - **Cloud Object Storage:** Hook up Cloudinary or AWS S3 for uploading product images dynamically from the Admin Dashboard.
 
 ### Deployment Status
-- **Neon Database**: Completed
-- **Prisma Database Synchronization**: Completed
-- **Render Configuration**: Prepared
-- **Render Deployment**: NOT YET DEPLOYED
+- **Neon PostgreSQL**: DEPLOYED / WORKING
+- **Render Backend**: DEPLOYED / LIVE
+- **Backend API Testing**: PASSED
+- **Vercel Frontend**: NOT YET DEPLOYED
 
