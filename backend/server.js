@@ -36,6 +36,11 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Health endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', service: 'EpicCart Backend' });
+});
+
 // Root route
 app.get('/', (req, res) => {
   res.send('Welcome to the EpicCart API');
