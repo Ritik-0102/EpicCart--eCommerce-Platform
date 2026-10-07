@@ -14,42 +14,131 @@ datasource db {
 // EPIC-CART DATABASE MODELS
 // -------------------------------------------------
 
-// The Category model represents a grouping of products (e.g., "Electronics", "Clothing").
-// One Category can have many Products (1-to-Many relationship).
 model Category {
-  id          Int       @id @default(autoincrement()) // Primary Key
-  name        String    @unique                       // Categories must have unique names
-  description String?                                 // Optional description (notice the '?')
-  createdAt   DateTime  @default(now())               // Automatically record when created
-  updatedAt   DateTime  @updatedAt                    // Automatically record when updated
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   
-  // This defines the "Many" side of the 1-to-Many relationship
   products    Product[]
 }
 
-// The Product model represents an item being sold in the store.
-// Many Products can belong to One Category.
 model Product {
-  id          Int       @id @default(autoincrement()) // Primary Key
+  id          Int       @id @default(autoincrement())
   name        String                                  
   description String
-  price       Float                                   // Floating point number for currency
-  stock       Int       @default(0)                   // Inventory tracking
-  imageUrl    String?                                 // Optional product image URL
+  price       Float
+  stock       Int       @default(0)
+  imageUrl    String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  // Foreign Key relationship connecting the Product to a Category
   categoryId  Int
   category    Category  @relation(fields: [categoryId], references: [id])
+  
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
+  reviews       Review[]
 }
 
-// The User model represents a registered customer.
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
-  password  String   // Will store a securely hashed password, never plain text
+  password  String
+  role      String   @default("USER")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  cart      Cart?
+  wishlist  Wishlist?
+  orders    Order[]
+  reviews   Review[]
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int        @unique
+  user      User       @relation(fields: [userId], references: [id])
+  items     CartItem[]
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cartId    Int
+  cart      Cart    @relation(fields: [cartId], references: [id])
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int     @default(1)
+
+  @@unique([cartId, productId])
+}
+
+model Wishlist {
+  id        Int            @id @default(autoincrement())
+  userId    Int            @unique
+  user      User           @relation(fields: [userId], references: [id])
+  items     WishlistItem[]
+}
+
+model WishlistItem {
+  id         Int      @id @default(autoincrement())
+  wishlistId Int
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id])
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+
+  @@unique([wishlistId, productId])
+}
+
+model Coupon {
+  id            Int     @id @default(autoincrement())
+  code          String  @unique
+  discountValue Float
+  isPercentage  Boolean
+  isActive      Boolean @default(true)
+  orders        Order[]
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  userId          Int
+  user            User        @relation(fields: [userId], references: [id])
+  subtotal        Float
+  discount        Float
+  total           Float
+  couponId        Int?
+  coupon          Coupon?     @relation(fields: [couponId], references: [id])
+  status          String      @default("PENDING")
+  shippingAddress String
+  city            String
+  postalCode      String
+  country         String
+  createdAt       DateTime    @default(now())
+  
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id          Int     @id @default(autoincrement())
+  orderId     Int
+  order       Order   @relation(fields: [orderId], references: [id])
+  productId   Int
+  productName String
+  price       Float
+  quantity    Int
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String?
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  productId Int
+  product   Product  @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
 }
