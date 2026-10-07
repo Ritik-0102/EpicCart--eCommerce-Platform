@@ -388,3 +388,12 @@ EpicCart has evolved from a static HTML prototype into a fully functional, conta
   - Exported loadCart in CartContext.jsx to ensure cart synchronization during checkout.
   - Re-implemented Razorpay dynamic loading and transaction lifecycle inside OrderDetails.jsx to achieve full checkout flow.
 - **Verification**: The frontend successfully built and all component routes (/products, /cart, /wishlist, /account, /checkout, /orders, /admin) navigate properly.
+
+### Day 17: Database Product Seeding & Real Data Flow Repair
+- **Root Cause Identified**: The production `/api/products` endpoint was returning an empty array `[]` because the Neon PostgreSQL database was empty. Even when populated, the frontend `Shop.jsx` had a parsing bug (`prods.data`) that mistakenly interpreted the array payload as `undefined`, falling back to an empty array.
+- **Fixes Applied**:
+  - Rewrote `backend/prisma/seed.js` to perform safe, idempotent data insertion.
+  - Inserted 30 realistic products across 4 categories (Electronics, Clothing, Home & Kitchen, Sports & Outdoors) into the Neon PostgreSQL production database using `prisma.category.upsert()` and a custom product existence check.
+  - Fixed the array parsing bug in `frontend/src/pages/Shop.jsx` (`Array.isArray(prods) ? prods : prods.data`).
+  - Rewrote `frontend/src/components/home/FeaturedProducts.jsx` to fetch real data via `fetchProducts()` from the backend instead of using hardcoded local static `mockData`.
+- **Verification**: The Render backend successfully returns 30 fully structured JSON products including `categoryId` relations. The Vercel frontend data flow (Neon -> Prisma -> Express -> React) is restored, rendering products dynamically.

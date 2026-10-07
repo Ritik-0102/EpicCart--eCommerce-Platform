@@ -23,10 +23,10 @@ const Shop = () => {
         setIsLoading(true);
         const [cats, prods] = await Promise.all([
           fetchCategories().catch(() => []),
-          fetchProducts()
+          fetchProducts().catch(() => [])
         ]);
         setCategories(cats);
-        setAllProducts(prods.data || []);
+        setAllProducts(Array.isArray(prods) ? prods : (prods.data || []));
       } catch (err) {
         setError(err.message || 'Failed to load products');
       } finally {
