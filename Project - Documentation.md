@@ -421,3 +421,21 @@ EpicCart has evolved from a static HTML prototype into a fully functional, conta
 - **CORS Verification:** `server.js` restricts CORS strictly to `process.env.FRONTEND_URL`. Production security relies on setting this correctly in the Render dashboard.
 - **Browser Automation Tests:** BLOCKED (Browser automation infrastructure not currently available in this execution environment; manual QA required post-deployment).
 - **Deployment Status:** Local code is verified ready. Vercel and Render deployments are currently running older commits and await the user's manual `git push`.
+
+### Day 20: Razorpay Payment Failure Fix
+- **Root Cause Identified**: The `OrderDetails.jsx` frontend component was displaying a "Failed to initiate payment" alert. This occurred because `backend/controllers/paymentController.js` was hardcoded to create the Razorpay order using `currency: "USD"`. For standard Indian merchant test accounts without international payments enabled, Razorpay rejects `USD` orders, causing an SDK error. Additionally, `frontend/src/services/api.js` was ignoring the `data.error` field, hiding the specific API error from the user.
+- **Fixes Applied**:
+  - Changed the hardcoded `currency: "USD"` to `currency: "INR"` in `backend/controllers/paymentController.js`.
+  - Upgraded the error handling in `paymentController.js` to log and return `error.description` (which contains Razorpay's actual rejection reason) alongside `error.message`.
+  - Updated `frontend/src/services/api.js`'s `initiatePayment` and `verifyPayment` methods to `throw new Error(data.error || data.message)` so that frontend alerts accurately reflect the underlying failure reason instead of masking it.
+- **Verification**: Code inspected and logical errors patched. Because actual payment processing relies on live/test Razorpay API keys injected via environment variables on the deployed server, the fix ensures the payload matches standard INR configuration requirements and guarantees proper error transparency on the frontend.
+
+### Day 20 (Part 2): Currency Consistency Audit & Verification
+- **Currency Decision:** The project natively stored numeric values resembling USD (e.g., 299.99 for an action camera). However, because Razorpay natively processes test domestic orders in INR, the system has been explicitly standardized to INR. The numeric amounts in the database have been preserved (e.g., 299.99 is now treated as ₹299.99) to satisfy the explicit test requirement of verifying `₹299.99 → 29999 paise` conversion, making this a dummy data store where prices are arbitrary.
+- **Frontend Changes:** A scripted replacement was executed across all customer-facing React components (`Cart.jsx`, `Checkout.jsx`, `OrderDetails.jsx`, `Orders.jsx`, `ProductDetails.jsx`, `Shop.jsx`, `Wishlist.jsx`, `AdminProducts.jsx`) to safely swap the hardcoded `$` sign with the `₹` symbol in UI elements, while explicitly avoiding templated API variables. 
+- **Security Audit (Backend):** 
+  - **Amount Verification:** `paymentController.js` creates Razorpay orders using `Math.round(order.total * 100)`. It correctly fetches the `order.total` directly from the secure Prisma backend database instead of relying on any client-provided amounts. This perfectly maps `₹299.99` to `29999 paise` as required by Razorpay.
+  - **Signature Verification:** Verified that `verifyPayment` mathematically reproduces the `hmac_sha256` signature using the protected `process.env.RAZORPAY_KEY_SECRET`. The order status is rigorously updated to `PAID` *only* if the signatures exactly match. 
+- **Testing Results:** 
+  - **Local:** The frontend Vite build succeeded. The database schema and JSON payloads were manually cross-referenced. A mock script replacement verified the UI rendering correctly parses and injects the INR symbol.
+  - **Remaining Production Tests:** A live E2E transaction on the deployed Vercel/Render stack is required once the code is pushed and the Vercel/Render environment variables contain the valid Razorpay Test keys.

@@ -168,7 +168,7 @@ const Checkout = () => {
             {cart.items.map(item => (
               <div key={item.id} className="summary-item">
                 <span>{item.product.name} (x{item.quantity})</span>
-                <span>${(item.product.price * item.quantity).toFixed(2)}</span>
+                <span>₹{(item.product.price * item.quantity).toFixed(2)}</span>
               </div>
             ))}
           </div>
@@ -179,12 +179,12 @@ const Checkout = () => {
             <div className="summary-totals">
               <div className="summary-row">
                 <span>Subtotal</span>
-                <span>${Number(summary.subtotal).toFixed(2)}</span>
+                <span>₹{Number(summary.subtotal).toFixed(2)}</span>
               </div>
               {summary.discount > 0 && (
                 <div className="summary-row discount">
                   <span>Discount</span>
-                  <span>-${Number(summary.discount).toFixed(2)}</span>
+                  <span>-₹{Number(summary.discount).toFixed(2)}</span>
                 </div>
               )}
               <div className="summary-row">
@@ -194,7 +194,7 @@ const Checkout = () => {
               <hr />
               <div className="summary-row total">
                 <span>Total</span>
-                <span>${Number(summary.total).toFixed(2)}</span>
+                <span>₹{Number(summary.total).toFixed(2)}</span>
               </div>
             </div>
           ) : (

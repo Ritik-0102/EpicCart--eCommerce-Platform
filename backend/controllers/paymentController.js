@@ -47,13 +47,12 @@ const initiatePayment = async (req, res, next) => {
     }
 
     // 3. Create a Razorpay Order
-    // Razorpay requires amount in smallest currency unit (e.g., paise for INR, cents for USD)
-    // We will assume USD for EpicCart, so multiply by 100
+    // Razorpay requires amount in smallest currency unit (e.g., paise for INR)
     const amountInSmallestUnit = Math.round(order.total * 100);
 
     const options = {
       amount: amountInSmallestUnit,
-      currency: "USD",
+      currency: "INR",
       receipt: `receipt_order_${order.id}`,
       payment_capture: 1 // Auto capture
     };
@@ -77,8 +76,13 @@ const initiatePayment = async (req, res, next) => {
     });
 
   } catch (error) {
-    console.error('Razorpay Initiation Error:', error);
-    res.status(500).json({ success: false, message: 'Failed to initiate payment', error: error.message });
+    // Log without exposing sensitive objects directly
+    console.error('Razorpay Initiation Error:', error.description || error.message || 'Unknown error');
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to initiate payment', 
+      error: error.description || error.message || 'Internal server error' 
+    });
   }
 };
 

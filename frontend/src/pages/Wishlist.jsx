@@ -64,7 +64,7 @@ const Wishlist = () => {
               <Link to={`/products/${item.product.id}`}>
                 <h3>{item.product.name}</h3>
               </Link>
-              <p className="price">${Number(item.product.price).toFixed(2)}</p>
+              <p className="price">₹{Number(item.product.price).toFixed(2)}</p>
               
               <div className="wishlist-actions">
                 <button 

@@ -162,12 +162,12 @@ const OrderDetails = () => {
             <h3>Order Summary</h3>
             <div className="summary-row">
               <span>Subtotal</span>
-              <span>${Number(order.subtotal).toFixed(2)}</span>
+              <span>₹{Number(order.subtotal).toFixed(2)}</span>
             </div>
             {order.discount > 0 && (
               <div className="summary-row discount">
                 <span>Discount {order.coupon ? `(${order.coupon.code})` : ''}</span>
-                <span>-${Number(order.discount).toFixed(2)}</span>
+                <span>-₹{Number(order.discount).toFixed(2)}</span>
               </div>
             )}
             <div className="summary-row">
@@ -177,7 +177,7 @@ const OrderDetails = () => {
             <hr />
             <div className="summary-row total">
               <span>Total</span>
-              <span>${Number(order.total).toFixed(2)}</span>
+              <span>₹{Number(order.total).toFixed(2)}</span>
             </div>
           </div>
 

@@ -251,7 +251,7 @@ const Shop = () => {
                   <p className="product-category-label">{product.category?.name || 'General'}</p>
                   <h3 className="product-name">{product.name}</h3>
                   <div className="product-price-row">
-                    <span className="current-price">${parseFloat(product.price).toFixed(2)}</span>
+                    <span className="current-price">₹{parseFloat(product.price).toFixed(2)}</span>
                   </div>
                 </div>
               </Link>

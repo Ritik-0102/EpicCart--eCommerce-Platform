@@ -80,7 +80,7 @@ const AdminProducts = () => {
               <tr key={product.id} className="border-b hover:bg-gray-50">
                 <td className="p-4">{product.id}</td>
                 <td className="p-4 font-medium">{product.name}</td>
-                <td className="p-4">${parseFloat(product.price).toFixed(2)}</td>
+                <td className="p-4">₹{parseFloat(product.price).toFixed(2)}</td>
                 <td className="p-4">{product.stock}</td>
                 <td className="p-4">
                   <div className="flex items-center gap-2">

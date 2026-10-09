@@ -289,7 +289,7 @@ export const initiatePayment = async (orderId, token) => {
       body: JSON.stringify({ orderId })
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Failed to initiate payment');
+    if (!response.ok) throw new Error(data.error || data.message || 'Failed to initiate payment');
     return data.data; // contains razorpay order id, amount, currency
   } catch (error) {
     console.error('API Error (initiatePayment):', error);
@@ -311,7 +311,7 @@ export const verifyPayment = async (paymentData, token) => {
       body: JSON.stringify(paymentData)
     });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Payment verification failed');
+    if (!response.ok) throw new Error(data.error || data.message || 'Payment verification failed');
     return data; // success true
   } catch (error) {
     console.error('API Error (verifyPayment):', error);
