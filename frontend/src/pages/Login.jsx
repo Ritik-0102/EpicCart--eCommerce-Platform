@@ -22,8 +22,8 @@ const Login = () => {
       // Attempt to login using the API service
       const data = await loginUser({ email, password });
       
-      // Save the user and token to our global AuthContext
-      login({ id: data.id, name: data.name, email: data.email }, data.token);
+      // Save the user (including role) and token to our global AuthContext
+      login({ id: data.id, name: data.name, email: data.email, role: data.role }, data.token);
       
       // Redirect to the account page after successful login
       navigate('/account');

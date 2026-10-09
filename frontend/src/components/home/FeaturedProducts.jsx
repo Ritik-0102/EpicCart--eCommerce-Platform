@@ -1,12 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchProducts } from '../../services/api';
+import { CartContext } from '../../context/CartContext';
+import { WishlistContext } from '../../context/WishlistContext';
+import { AuthContext } from '../../context/AuthContext';
+import toast from 'react-hot-toast';
 import './FeaturedProducts.css';
 
 const FeaturedProducts = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [addingToCart, setAddingToCart] = useState({}); // track per-product loading
+
+  const { addToCart } = useContext(CartContext);
+  const { addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemId } = useContext(WishlistContext);
+  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -24,6 +34,56 @@ const FeaturedProducts = () => {
     loadProducts();
   }, []);
 
+  const handleAddToCart = async (e, product) => {
+    // Stop the click from navigating to product details
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error('Please log in to add items to the cart.');
+      navigate('/login');
+      return;
+    }
+
+    setAddingToCart(prev => ({ ...prev, [product.id]: true }));
+    const success = await addToCart(product.id, 1);
+    setAddingToCart(prev => ({ ...prev, [product.id]: false }));
+
+    if (success) {
+      toast.success(`"${product.name}" added to cart!`);
+    } else {
+      toast.error('Failed to add to cart. Please try again.');
+    }
+  };
+
+  const handleWishlistToggle = async (e, product) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error('Please log in to manage your wishlist.');
+      navigate('/login');
+      return;
+    }
+
+    const inWishlist = isInWishlist(product.id);
+    if (inWishlist) {
+      // Retrieve the wishlist item's row ID (not the product ID)
+      const itemId = getWishlistItemId(product.id);
+      if (itemId) {
+        await removeFromWishlist(itemId);
+        toast.success(`"${product.name}" removed from wishlist.`);
+      }
+    } else {
+      const success = await addToWishlist(product.id);
+      if (success) {
+        toast.success(`"${product.name}" added to wishlist!`);
+      } else {
+        toast.error('Failed to update wishlist.');
+      }
+    }
+  };
+
   if (isLoading) return <div className="container status-message">Loading featured products...</div>;
   if (error) return <div className="container status-message error">{error}</div>;
 
@@ -38,8 +98,21 @@ const FeaturedProducts = () => {
         {featuredProducts.map((product) => (
           <Link to={`/products/${product.id}`} key={product.id} className="product-card">
             <div className="product-image-container">
-              <img src={product.imageUrl || 'https://via.placeholder.com/500?text=No+Image'} alt={product.name} className="product-image" />
-              <button className="wishlist-btn" onClick={(e) => e.preventDefault()}>♡</button>
+              <img
+                src={product.imageUrl || 'https://via.placeholder.com/500?text=No+Image'}
+                alt={product.name}
+                className="product-image"
+                onError={(e) => { e.target.src = 'https://via.placeholder.com/500?text=No+Image'; }}
+              />
+              {/* Wishlist button — stops link navigation */}
+              <button
+                className={`wishlist-btn${isInWishlist(product.id) ? ' in-wishlist' : ''}`}
+                onClick={(e) => handleWishlistToggle(e, product)}
+                aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+              >
+                {isInWishlist(product.id) ? '♥' : '♡'}
+              </button>
             </div>
             
             <div className="product-info">
@@ -50,7 +123,15 @@ const FeaturedProducts = () => {
                 <div className="price-container">
                   <span className="current-price">${parseFloat(product.price).toFixed(2)}</span>
                 </div>
-                <button className="add-to-cart-btn" onClick={(e) => e.preventDefault()}>Add +</button>
+                {/* Add to cart button — stops link navigation */}
+                <button
+                  className="add-to-cart-btn"
+                  onClick={(e) => handleAddToCart(e, product)}
+                  disabled={addingToCart[product.id]}
+                  aria-label={`Add ${product.name} to cart`}
+                >
+                  {addingToCart[product.id] ? '...' : 'Add +'}
+                </button>
               </div>
             </div>
           </Link>

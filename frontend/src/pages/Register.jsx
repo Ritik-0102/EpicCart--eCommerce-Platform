@@ -24,7 +24,7 @@ const Register = () => {
       const data = await registerUser({ name, email, password });
       
       // The API returns the user and a JWT token upon successful registration
-      login({ id: data.id, name: data.name, email: data.email }, data.token);
+      login({ id: data.id, name: data.name, email: data.email, role: data.role }, data.token);
       
       // Redirect to account dashboard
       navigate('/account');

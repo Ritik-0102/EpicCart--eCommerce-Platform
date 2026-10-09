@@ -1,16 +1,25 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchCategories } from '../../services/api';
 import './Categories.css';
 
+// Map category names to icons (SVG-safe emoji alternatives)
+const CATEGORY_ICONS = {
+  'Electronics': '📱',
+  'Clothing': '👗',
+  'Home & Kitchen': '🏠',
+  'Sports & Outdoors': '⚽',
+};
+
+// Fallback icon for unknown categories
+const DEFAULT_ICON = '🛍️';
+
 const Categories = () => {
-  // We use state to track our data, loading status, and any potential errors.
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // We define an async function inside useEffect to handle the data fetching
     const loadCategories = async () => {
       try {
         setIsLoading(true);
@@ -20,26 +29,40 @@ const Categories = () => {
       } catch (err) {
         setError(err.message);
       } finally {
-        setIsLoading(false); // Whether success or error, stop loading
+        setIsLoading(false);
       }
     };
 
     loadCategories();
-  }, []); // Empty dependency array means this runs once when the component mounts
+  }, []);
 
   return (
-    <section className="categories-section container">
-      <h2 className="section-title">Shop by Category</h2>
+    <section id="categories" className="categories-section container" aria-label="Shop by category">
+      <div className="section-header">
+        <h2 className="section-title">Shop by Category</h2>
+        <Link to="/products" className="view-all">Browse All</Link>
+      </div>
       
       {/* Loading State */}
-      {isLoading && <div className="status-message loading">Loading categories...</div>}
+      {isLoading && (
+        <div className="categories-grid skeleton-grid">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="category-card skeleton"></div>
+          ))}
+        </div>
+      )}
       
       {/* Error State */}
       {error && !isLoading && (
         <div className="status-message error">
-          <p>âš ï¸ Oops! We couldn't load the categories.</p>
-          <p className="error-details">{error}</p>
-          <p className="error-hint">If this is a local environment, ensure your PostgreSQL database is running.</p>
+          <p>Could not load categories.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="btn btn-secondary"
+            style={{ marginTop: '0.5rem' }}
+          >
+            Retry
+          </button>
         </div>
       )}
 
@@ -54,10 +77,20 @@ const Categories = () => {
       {!isLoading && !error && categories.length > 0 && (
         <div className="categories-grid">
           {categories.map((category) => (
-            <Link to={`/products?category=${category.slug || category.name.toLowerCase()}`} key={category.id} className="category-card">
-              {/* Fallback icon if the database doesn't supply one */}
-              <div className="category-icon">{category.icon || 'ðŸ“¦'}</div>
+            <Link 
+              to={`/products?category=${encodeURIComponent(category.name.toLowerCase())}`} 
+              key={category.id} 
+              className="category-card"
+              aria-label={`Browse ${category.name}`}
+            >
+              {/* Use emoji icon mapped by category name, or default */}
+              <div className="category-icon" role="img" aria-hidden="true">
+                {CATEGORY_ICONS[category.name] || DEFAULT_ICON}
+              </div>
               <h3 className="category-name">{category.name}</h3>
+              {category.description && (
+                <p className="category-desc">{category.description}</p>
+              )}
             </Link>
           ))}
         </div>
@@ -67,6 +100,3 @@ const Categories = () => {
 };
 
 export default Categories;
-
-
-

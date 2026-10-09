@@ -11,7 +11,7 @@ const Benefits = () => {
     {
       icon: '🔒',
       title: 'Secure Payment',
-      description: '100% secure payment'
+      description: '100% secure & encrypted'
     },
     {
       icon: '↩️',
@@ -21,16 +21,16 @@ const Benefits = () => {
     {
       icon: '💬',
       title: '24/7 Support',
-      description: 'Dedicated support'
+      description: 'Dedicated support team'
     }
   ];
 
   return (
-    <section className="benefits-section">
+    <section className="benefits-section" aria-label="Shopping benefits">
       <div className="container benefits-grid">
         {benefitsList.map((benefit, index) => (
           <div key={index} className="benefit-item">
-            <div className="benefit-icon">{benefit.icon}</div>
+            <div className="benefit-icon" role="img" aria-label={benefit.title}>{benefit.icon}</div>
             <div className="benefit-text">
               <h4>{benefit.title}</h4>
               <p>{benefit.description}</p>

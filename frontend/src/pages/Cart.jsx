@@ -32,7 +32,7 @@ const Cart = () => {
       <div className="cart-container empty-state">
         <h2>Your Cart is Empty</h2>
         <p>Looks like you haven't added anything yet.</p>
-        <Link to="/shop" className="btn btn-primary">Start Shopping</Link>
+        <Link to="/products" className="btn btn-primary">Start Shopping</Link>
       </div>
     );
   }
@@ -89,7 +89,7 @@ const Cart = () => {
           <h3>Order Summary</h3>
           <div className="summary-row">
             <span>Subtotal</span>
-            <span>${Number(cart.totalAmount).toFixed(2)}</span>
+            <span>${Number(cart.totalPrice || cart.items.reduce((acc, item) => acc + item.quantity * item.product.price, 0)).toFixed(2)}</span>
           </div>
           <div className="summary-row">
             <span>Shipping</span>
@@ -98,7 +98,7 @@ const Cart = () => {
           <hr />
           <div className="summary-row total">
             <span>Total</span>
-            <span>${Number(cart.totalAmount || cart.items.reduce((acc, item) => acc + item.quantity * item.product.price, 0)).toFixed(2)}</span>
+            <span>${Number(cart.totalPrice || cart.items.reduce((acc, item) => acc + item.quantity * item.product.price, 0)).toFixed(2)}</span>
           </div>
           <button 
             className="btn btn-primary btn-checkout" 
@@ -107,6 +107,7 @@ const Cart = () => {
           >
             Proceed to Checkout
           </button>
+          <Link to="/products" className="continue-shopping-link">← Continue Shopping</Link>
         </div>
       </div>
     </div>

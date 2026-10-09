@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import './Hero.css';
 
@@ -15,7 +15,7 @@ const Hero = () => {
           </p>
           <div className="hero-buttons">
             <Link to="/products" className="btn btn-primary hero-btn">Shop Now</Link>
-            <Link to="/products" className="btn btn-outline hero-btn">View Collections</Link>
+            <a href="#categories" className="btn btn-outline hero-btn">View Collections</a>
           </div>
         </div>
         <div className="hero-image">
@@ -31,4 +31,3 @@ const Hero = () => {
 };
 
 export default Hero;
-

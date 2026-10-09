@@ -68,10 +68,20 @@ export const WishlistProvider = ({ children }) => {
     return wishlist.items.some(item => item.productId === productId);
   };
 
+  /**
+   * Returns the wishlist item's id (row id) for a given productId.
+   * Used by components that need to call removeFromWishlist(itemId).
+   */
+  const getWishlistItemId = (productId) => {
+    if (!wishlist || !wishlist.items) return null;
+    const item = wishlist.items.find(item => item.productId === productId);
+    return item ? item.id : null;
+  };
+
   const wishlistItemCount = wishlist?.items?.length || 0;
 
   return (
-    <WishlistContext.Provider value={{ wishlist, loading, error, addToWishlist, removeFromWishlist, isInWishlist, wishlistItemCount }}>
+    <WishlistContext.Provider value={{ wishlist, loading, error, addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemId, wishlistItemCount }}>
       {children}
     </WishlistContext.Provider>
   );

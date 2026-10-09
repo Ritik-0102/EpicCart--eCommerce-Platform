@@ -44,7 +44,7 @@ const Orders = () => {
       <div className="orders-container container empty-state">
         <h2>Order History</h2>
         <p>You haven't placed any orders yet.</p>
-        <Link to="/shop" className="btn btn-primary">Start Shopping</Link>
+        <Link to="/products" className="btn btn-primary">Start Shopping</Link>
       </div>
     );
   }

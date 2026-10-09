@@ -34,7 +34,7 @@ const Wishlist = () => {
       <div className="wishlist-container empty-state">
         <h2>Your Wishlist is Empty</h2>
         <p>You haven't saved any items yet.</p>
-        <Link to="/shop" className="btn btn-primary">Start Shopping</Link>
+        <Link to="/products" className="btn btn-primary">Start Shopping</Link>
       </div>
     );
   }

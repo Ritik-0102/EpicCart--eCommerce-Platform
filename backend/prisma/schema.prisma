@@ -117,6 +117,11 @@ model Order {
   country         String
   createdAt       DateTime    @default(now())
   
+  // Razorpay payment integration fields
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  razorpaySignature String?
+  
   items           OrderItem[]
 }
 

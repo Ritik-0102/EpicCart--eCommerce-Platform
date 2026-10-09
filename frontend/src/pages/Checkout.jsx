@@ -7,7 +7,7 @@ import './Checkout.css';
 
 const Checkout = () => {
   const { user, token } = useContext(AuthContext);
-  const { cart, loadCart } = useContext(CartContext);
+  const { cart, loadCart, loading: cartLoading } = useContext(CartContext);
   const navigate = useNavigate();
 
   const [shippingAddress, setShippingAddress] = useState('');
@@ -22,6 +22,8 @@ const Checkout = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (cartLoading) return; // Wait for cart to finish loading
+
     if (!user) {
       navigate('/login');
     } else if (!cart || !cart.items || cart.items.length === 0) {
@@ -30,7 +32,7 @@ const Checkout = () => {
       loadSummary();
     }
     // eslint-disable-next-line
-  }, [user, cart]);
+  }, [user, cart, cartLoading]);
 
   const loadSummary = async (code = '') => {
     setLoading(true);

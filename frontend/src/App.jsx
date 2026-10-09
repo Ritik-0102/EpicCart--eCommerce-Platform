@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
@@ -45,6 +45,16 @@ function App() {
         <Route path="/faq" element={<InfoPage title="Frequently Asked Questions" />} />
         <Route path="/shipping" element={<InfoPage title="Shipping Information" />} />
         <Route path="/returns" element={<InfoPage title="Returns Policy" />} />
+        {/* Redirect legacy /shop URL to /products */}
+        <Route path="/shop" element={<Navigate to="/products" replace />} />
+        {/* 404 catch-all */}
+        <Route path="*" element={
+          <div className="container" style={{ padding: '80px 20px', textAlign: 'center', minHeight: '60vh' }}>
+            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>404 — Page Not Found</h2>
+            <p style={{ color: '#6b7280', marginBottom: '2rem' }}>The page you're looking for doesn't exist.</p>
+            <a href="/products" className="btn btn-primary" style={{ display: 'inline-block', padding: '0.75rem 1.5rem', background: '#2563eb', color: 'white', borderRadius: '0.5rem', textDecoration: 'none' }}>Browse Products</a>
+          </div>
+        } />
       </Routes>
       <Footer />
     </div>

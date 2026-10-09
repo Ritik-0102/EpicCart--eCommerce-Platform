@@ -91,3 +91,63 @@
   font-weight: 500;
   color: var(--color-text-muted);
 }
+
+/* --- Added for Shop Rewrite with Cart/Wishlist --- */
+.product-card-wrapper {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  height: 100%;
+}
+
+.product-card-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.shop-product-card {
+  flex: 1; /* take up remaining space so the button is at the bottom */
+  text-decoration: none;
+  color: inherit;
+  /* removed the transform hover from here, moved to wrapper */
+  transform: none !important;
+}
+
+.shop-add-btn {
+  width: 100%;
+  padding: var(--space-3);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.shop-add-btn:hover:not(:disabled) {
+  background-color: var(--color-primary-dark);
+}
+
+.shop-add-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.result-count {
+  margin-bottom: var(--space-6);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.status-message.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-8);
+}

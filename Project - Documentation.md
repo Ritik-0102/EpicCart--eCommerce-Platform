@@ -397,3 +397,27 @@ EpicCart has evolved from a static HTML prototype into a fully functional, conta
   - Fixed the array parsing bug in `frontend/src/pages/Shop.jsx` (`Array.isArray(prods) ? prods : prods.data`).
   - Rewrote `frontend/src/components/home/FeaturedProducts.jsx` to fetch real data via `fetchProducts()` from the backend instead of using hardcoded local static `mockData`.
 - **Verification**: The Render backend successfully returns 30 fully structured JSON products including `categoryId` relations. The Vercel frontend data flow (Neon -> Prisma -> Express -> React) is restored, rendering products dynamically.
+
+### Day 18: Full eCommerce Redesign & Bug Fixes
+- **Completed Work:**
+  - **Routing/Navigation:** Added missing `/shop` -> `/products` redirect to prevent 404s, added a global 404 catch-all page, fixed legacy `/shop` links in Cart, Wishlist, Orders, and ProductDetails pages.
+  - **Cart Total Fix:** Corrected cart total display to use `cart.totalPrice` matching the backend Prisma return payload, instead of undefined `totalAmount`.
+  - **Prisma Schema Update:** Extended `Order` model with Razorpay fields (`razorpayOrderId`, `razorpayPaymentId`, `razorpaySignature`) to properly track payment integrations.
+  - **Backend Routes:** Fixed payment route mismatch where frontend called `/api/payments` but backend exposed `/api/payment`.
+  - **Auth Context Payload:** Fixed Login and Register payloads to persist the `role` attribute into localStorage/context, repairing Admin dashboard authorization checks.
+  - **Homepage UI & UX:** Repaired mojibake (broken Unicode) emojis across Navbar, Footer, Benefits, and Categories components. Rewrote FeaturedProducts to be fully functional (Add to Cart / Wishlist toggle). Updated Hero button to anchor link to Categories.
+  - **Shop Page Polish:** Added sorting/filtering layout, added working Add to Cart and Wishlist toggle buttons directly on the product cards, fixed nested `<Link>` warnings, added empty state filters reset.
+  - **Checkout Race Condition:** Fixed a critical bug in `Checkout.jsx` where it would redirect users away if the cart fetch promise had not yet resolved.
+- **Verification:** Frontend Vite production build succeeds. No Git operations were performed automatically. Render and Vercel will reflect changes on the next manual deployment. Neon database requires a manual `npx prisma db push` to synchronize the updated schema from a network that permits connection.
+
+### Day 19: Final Pre-Deployment Verification Audit
+- **Git State:** 21 files modified locally containing fixes for Shop buttons, Checkout race conditions, context payloads, and UI bugs. No Git history altered.
+- **Frontend Build:** `npm run build` executed and passed in ~1.5 seconds. PWA service workers compiled successfully.
+- **Routing & Empty States:** Verified `App.jsx` redirects legacy `/shop` to `/products`. Verified `Cart.jsx` and `Wishlist.jsx` "Start Shopping" buttons point exactly to `/products`.
+- **Live API State:** Verified `https://epiccart-backend.onrender.com/api/products` returns HTTP 200 with exactly 30 seeded products from the Neon database.
+- **Database Schema Sync:** `prisma db pull` confirmed the live database was missing the Razorpay fields (`razorpayOrderId`, `razorpayPaymentId`, `razorpaySignature`). The transient Neon `P1001` connection error resolved itself (likely a local DNS/IP routing glitch). A safe `npx prisma db push` was successfully executed to append these fields to the live production database.
+- **Context Handlers:** Traced `Shop.jsx` and `FeaturedProducts.jsx` click handlers; confirmed they prevent default navigation and correctly dispatch `addToCart` and `wishlistToggle` actions.
+- **Security & Secrets:** Verified `frontend/src/services/api.js` strictly relies on `import.meta.env.VITE_API_URL` and `import.meta.env.VITE_RAZORPAY_KEY_ID`. No backend secrets (like `JWT_SECRET` or `DATABASE_URL`) are leaked into frontend bundles.
+- **CORS Verification:** `server.js` restricts CORS strictly to `process.env.FRONTEND_URL`. Production security relies on setting this correctly in the Render dashboard.
+- **Browser Automation Tests:** BLOCKED (Browser automation infrastructure not currently available in this execution environment; manual QA required post-deployment).
+- **Deployment Status:** Local code is verified ready. Vercel and Render deployments are currently running older commits and await the user's manual `git push`.
