@@ -8,7 +8,7 @@ const {
   deleteProduct
 } = require('../controllers/productController');
 
-const { protect } = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 const { createReview, getProductReviews } = require('../controllers/reviewController');
 
 // Map routes to controller methods
@@ -17,8 +17,8 @@ router.get('/:id', getProductById);
 router.get('/:id/reviews', getProductReviews);
 router.post('/:id/reviews', protect, createReview);
 
-router.post('/', createProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+router.post('/', protect, admin, createProduct);
+router.put('/:id', protect, admin, updateProduct);
+router.delete('/:id', protect, admin, deleteProduct);
 
 module.exports = router;

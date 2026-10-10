@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const cloudinary = require('../config/cloudinary');
 
 // @desc    Get all products
 // @route   GET /api/products
@@ -42,7 +43,7 @@ const getProductById = async (req, res, next) => {
 // @route   POST /api/products
 const createProduct = async (req, res, next) => {
   try {
-    const { name, description, price, stock, imageUrl, categoryId } = req.body;
+    const { name, description, price, stock, imageUrl, imagePublicId, categoryId } = req.body;
 
     // Basic Validation
     if (!name || !description || price === undefined || !categoryId) {
@@ -65,6 +66,7 @@ const createProduct = async (req, res, next) => {
         price: parseFloat(price),
         stock: stock ? parseInt(stock) : 0,
         imageUrl,
+        imagePublicId,
         categoryId: parseInt(categoryId)
       }
     });
@@ -90,7 +92,7 @@ const updateProduct = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
-    const { name, description, price, stock, imageUrl, categoryId } = req.body;
+    const { name, description, price, stock, imageUrl, imagePublicId, categoryId } = req.body;
 
     const updatedProduct = await prisma.product.update({
       where: { id: productId },
@@ -100,9 +102,23 @@ const updateProduct = async (req, res, next) => {
         price: price !== undefined ? parseFloat(price) : existingProduct.price,
         stock: stock !== undefined ? parseInt(stock) : existingProduct.stock,
         imageUrl: imageUrl !== undefined ? imageUrl : existingProduct.imageUrl,
+        imagePublicId: imagePublicId !== undefined ? imagePublicId : existingProduct.imagePublicId,
         categoryId: categoryId !== undefined ? parseInt(categoryId) : existingProduct.categoryId
       }
     });
+
+    // If there is an old Cloudinary image and it's being replaced or removed, delete it ONLY AFTER successful DB update
+    if (
+      existingProduct.imagePublicId && 
+      ( (imagePublicId !== undefined && imagePublicId !== existingProduct.imagePublicId) || 
+        (imageUrl !== undefined && imageUrl !== existingProduct.imageUrl && imagePublicId === undefined) )
+    ) {
+      try {
+        await cloudinary.uploader.destroy(existingProduct.imagePublicId);
+      } catch (cloudinaryError) {
+        console.error("Failed to delete old Cloudinary image:", cloudinaryError);
+      }
+    }
 
     res.status(200).json({ success: true, data: updatedProduct });
   } catch (error) {
@@ -128,6 +144,15 @@ const deleteProduct = async (req, res, next) => {
     await prisma.product.delete({
       where: { id: productId }
     });
+
+    // If it has a Cloudinary image, destroy it ONLY AFTER successful DB deletion
+    if (existingProduct.imagePublicId) {
+      try {
+        await cloudinary.uploader.destroy(existingProduct.imagePublicId);
+      } catch (cloudinaryError) {
+        console.error("Failed to delete Cloudinary image on product deletion:", cloudinaryError);
+      }
+    }
 
     res.status(200).json({ success: true, message: 'Product successfully deleted' });
   } catch (error) {
