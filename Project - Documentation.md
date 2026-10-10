@@ -439,3 +439,34 @@ EpicCart has evolved from a static HTML prototype into a fully functional, conta
 - **Testing Results:** 
   - **Local:** The frontend Vite build succeeded. The database schema and JSON payloads were manually cross-referenced. A mock script replacement verified the UI rendering correctly parses and injects the INR symbol.
   - **Remaining Production Tests:** A live E2E transaction on the deployed Vercel/Render stack is required once the code is pushed and the Vercel/Render environment variables contain the valid Razorpay Test keys.
+
+### Day 21: Cloudinary Image Storage Integration
+- **Objective:** Integrate Cloudinary to allow product image uploads from the Admin interface.
+- **Backend Architecture:**
+  - Added `imagePublicId` to the `Product` model in `backend/prisma/schema.prisma` to track the Cloudinary public ID for deletion.
+  - Implemented `backend/config/cloudinary.js` to initialize the Cloudinary Node SDK.
+  - Created `backend/routes/uploadRoutes.js` and `backend/controllers/uploadController.js` using `multer.memoryStorage()` to handle uploads and stream them to Cloudinary (limited to 5MB, JPEG/PNG/WebP formats).
+  - Secured `uploadRoutes.js` and `productRoutes.js` (POST, PUT, DELETE) with `protect, admin` middleware to prevent unauthorized access.
+  - Updated `productController.js` to accept `imagePublicId` and automatically delete orphaned images from Cloudinary when a product is updated with a new image or deleted.
+- **Frontend Architecture:**
+  - Added admin CRUD and upload methods (`createAdminProduct`, `updateAdminProduct`, `deleteAdminProduct`, `uploadImage`) to `frontend/src/services/api.js`.
+  - Rebuilt `frontend/src/pages/AdminProducts.jsx` to include a full Create/Edit Product Modal with an integrated image upload flow (preview, uploading states, and data preparation).
+- **Environment & Database:**
+  - `backend/.env.example` was updated with `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` placeholders.
+  - The live database schema needs an update (`npx prisma db push`) to add the `imagePublicId` column once deployed (handled by CI/CD on Render).
+  - **Important:** Existing product seed data using standard URL strings is fully preserved and gracefully handled alongside Cloudinary images.
+
+### Day 21 (Part 2): Pre-Deployment Verification Audit
+- **Upload Endpoints Security:** Verified `backend/routes/uploadRoutes.js`. The endpoint `/api/upload` correctly mounts the project's native `protect` and `admin` middleware before parsing with Multer, confirming only authenticated admins can upload.
+- **Product Controller Image Logic Safety:** Verified `create`, `update`, and `delete` controllers in `backend/controllers/productController.js`.
+  - **Bug Fixed During Audit:** Originally, the controller was deleting Cloudinary images *before* executing the database update or delete operation. If a database constraint failed, the image would have been prematurely destroyed. This was corrected. The Cloudinary `destroy` method is now executed *strictly after* a successful Prisma database commit.
+  - External non-Cloudinary images (`imageUrl` without an `imagePublicId`) are correctly preserved and do not trigger deletion errors.
+- **Database Push Configuration Risk:** Inspected the backend `package.json`. There is no `build` script containing `prisma db push`, nor is there a `render.yaml`. This confirms the production Neon database **will not** automatically receive the new `imagePublicId` column during a standard Render deploy unless explicitly commanded.
+- **Upload Validation:** Verified Multer is utilizing memory storage and restricting uploads strictly to JPEG/PNG/WebP formats with a 5MB maximum file size.
+- **Frontend Checks:** Verified the frontend production build passes (`vite build`). No secrets were exposed on the frontend since `uploadImage` calls rely on the backend proxying the actual Cloudinary request.
+- **Testing:** Local static builds and syntax validation succeeded. **Note:** A full live production upload cycle has *not* yet been tested end-to-end, as it requires the production environment variables and database schema push to be live on Render.
+- **Manual Actions Required Next:**
+  1. Add `CLOUDINARY_*` environment variables to the Render dashboard.
+  2. Deploy the backend.
+  3. **Manually run** `npx prisma db push` via the Render Shell (or update your Render Build Command to `npm install && npx prisma db push`) to ensure the Neon database accepts the `imagePublicId` field.
+  4. Deploy the frontend to Vercel.

@@ -389,6 +389,82 @@ export const updateProductStock = async (productId, stock, token) => {
   }
 };
 
+export const createAdminProduct = async (productData, token) => {
+  try {
+    const response = await fetch(`${API_URL}/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(productData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to create product');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (createAdminProduct):', error);
+    throw error;
+  }
+};
+
+export const updateAdminProduct = async (productId, productData, token) => {
+  try {
+    const response = await fetch(`${API_URL}/products/${productId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(productData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update product');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (updateAdminProduct):', error);
+    throw error;
+  }
+};
+
+export const deleteAdminProduct = async (productId, token) => {
+  try {
+    const response = await fetch(`${API_URL}/products/${productId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to delete product');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (deleteAdminProduct):', error);
+    throw error;
+  }
+};
+
+export const uploadImage = async (file, token) => {
+  try {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch(`${API_URL}/upload`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData // No Content-Type header; fetch sets it automatically with boundary for FormData
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to upload image');
+    return data.data; // { url, publicId }
+  } catch (error) {
+    console.error('API Error (uploadImage):', error);
+    throw error;
+  }
+};
+
 /**
  * --- REVIEWS API ---
  */
