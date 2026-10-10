@@ -323,6 +323,22 @@ export const verifyPayment = async (paymentData, token) => {
  * --- ADMIN API CALLS ---
  */
 
+export const setupAdminProfile = async (setupData) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/setup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(setupData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Admin setup failed');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (setupAdminProfile):', error);
+    throw error;
+  }
+};
+
 export const fetchAdminSummary = async (token) => {
   try {
     const response = await fetch(`${API_URL}/admin/summary`, {
@@ -347,6 +363,95 @@ export const fetchAllOrders = async (token) => {
     return data.data;
   } catch (error) {
     console.error('API Error (fetchAllOrders):', error);
+    throw error;
+  }
+};
+
+export const fetchInventoryLogs = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/inventory`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch inventory logs');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (fetchInventoryLogs):', error);
+    throw error;
+  }
+};
+
+export const fetchCustomers = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/users`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch customers');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (fetchCustomers):', error);
+    throw error;
+  }
+};
+
+export const fetchCoupons = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/coupons`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch coupons');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (fetchCoupons):', error);
+    throw error;
+  }
+};
+
+export const createAdminCoupon = async (couponData, token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/coupons`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(couponData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to create coupon');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (createAdminCoupon):', error);
+    throw error;
+  }
+};
+
+export const updateAdminCoupon = async (couponId, couponData, token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/coupons/${couponId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(couponData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update coupon');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (updateAdminCoupon):', error);
+    throw error;
+  }
+};
+
+export const deleteAdminCoupon = async (couponId, token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/coupons/${couponId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to delete coupon');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (deleteAdminCoupon):', error);
     throw error;
   }
 };
@@ -465,6 +570,97 @@ export const uploadImage = async (file, token) => {
   }
 };
 
+export const createCategory = async (categoryData, token) => {
+  try {
+    const response = await fetch(`${API_URL}/categories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(categoryData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to create category');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (createCategory):', error);
+    throw error;
+  }
+};
+
+export const updateCategory = async (categoryId, categoryData, token) => {
+  try {
+    const response = await fetch(`${API_URL}/categories/${categoryId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(categoryData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update category');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (updateCategory):', error);
+    throw error;
+  }
+};
+
+export const deleteCategory = async (categoryId, token) => {
+  try {
+    const response = await fetch(`${API_URL}/categories/${categoryId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to delete category');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (deleteCategory):', error);
+    throw error;
+  }
+};
+
+export const fetchStoreSettings = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/settings`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch settings');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (fetchStoreSettings):', error);
+    throw error;
+  }
+};
+
+export const updateStoreSettings = async (settingsData, token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/settings`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(settingsData)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update settings');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (updateStoreSettings):', error);
+    throw error;
+  }
+};
+
+export const fetchAuditLogs = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/audit-logs`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch audit logs');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (fetchAuditLogs):', error);
+    throw error;
+  }
+};
+
 /**
  * --- REVIEWS API ---
  */
@@ -496,6 +692,35 @@ export const createProductReview = async (productId, reviewData, token) => {
     return data.data;
   } catch (error) {
     console.error('API Error (createProductReview):', error);
+    throw error;
+  }
+};
+
+export const fetchAdminReviews = async (token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/reviews`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch reviews');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (fetchAdminReviews):', error);
+    throw error;
+  }
+};
+
+export const deleteAdminReview = async (reviewId, token) => {
+  try {
+    const response = await fetch(`${API_URL}/admin/reviews/${reviewId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to delete review');
+    return data.data;
+  } catch (error) {
+    console.error('API Error (deleteAdminReview):', error);
     throw error;
   }
 };

@@ -1,8 +1,9 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
+import AdminLayout from './components/layout/AdminLayout';
 
 // Pages
 import Home from './pages/Home';
@@ -19,12 +20,26 @@ import Checkout from './pages/Checkout';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
+import AdminSetup from './pages/AdminSetup';
 import InfoPage from './pages/InfoPage';
 
+import AdminInventory from './pages/AdminInventory';
+
+import AdminCustomers from './pages/AdminCustomers';
+import AdminCategories from './pages/AdminCategories';
+import AdminCoupons from './pages/AdminCoupons';
+import AdminReviews from './pages/AdminReviews';
+import AdminSettings from './pages/AdminSettings';
+import AdminAuditLogs from './pages/AdminAuditLogs';
+
 function App() {
+  const location = useLocation();
+  const isAdminRoute = location.pathname.startsWith('/admin') && location.pathname !== '/admin/setup';
+
   return (
     <div className="app-container">
-      <Navbar />
+      {/* Hide customer Navbar/Footer for Admin Portal (except setup maybe, or hide it there too) */}
+      {!isAdminRoute && <Navbar />}
       <Toaster position="top-right" />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -38,13 +53,29 @@ function App() {
         <Route path="/orders" element={<Orders />} />
         <Route path="/orders/:id" element={<OrderDetails />} />
         <Route path="/checkout" element={<Checkout />} />
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/products" element={<AdminProducts />} />
-        <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/contact" element={<InfoPage title="Contact Us" />} />
         <Route path="/faq" element={<InfoPage title="Frequently Asked Questions" />} />
         <Route path="/shipping" element={<InfoPage title="Shipping Information" />} />
         <Route path="/returns" element={<InfoPage title="Returns Policy" />} />
+        
+        {/* Admin Setup Route (One-time) */}
+        <Route path="/admin/setup" element={<AdminSetup />} />
+
+        {/* Admin Portal Routes wrapped in Layout */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminDashboard />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="inventory" element={<AdminInventory />} />
+          <Route path="customers" element={<AdminCustomers />} />
+          {/* Placeholders for future phases */}
+          <Route path="categories" element={<AdminCategories />} />
+          <Route path="coupons" element={<AdminCoupons />} />
+          <Route path="reviews" element={<AdminReviews />} />
+          <Route path="settings" element={<AdminSettings />} />
+          <Route path="audit-logs" element={<AdminAuditLogs />} />
+        </Route>
+
         {/* Redirect legacy /shop URL to /products */}
         <Route path="/shop" element={<Navigate to="/products" replace />} />
         {/* 404 catch-all */}
@@ -56,7 +87,7 @@ function App() {
           </div>
         } />
       </Routes>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }

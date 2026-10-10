@@ -470,3 +470,9 @@ EpicCart has evolved from a static HTML prototype into a fully functional, conta
   2. Deploy the backend.
   3. **Manually run** `npx prisma db push` via the Render Shell (or update your Render Build Command to `npm install && npx prisma db push`) to ensure the Neon database accepts the `imagePublicId` field.
   4. Deploy the frontend to Vercel.
+
+## Day 21: Secure Admin Portal Finalization & Audit
+
+- **Phases 7, 8, 9 Completed:** Implemented Categories, Coupons, Reviews, Store Settings, and robust Audit Logging via uditMiddleware.js.
+- **Audit Middleware Security:** Added deep object sanitization to prevent leaking passwords, secrets, or tokens into the AuditLog database table.
+- **Pre-Deployment Audit Executed:** Identified blockers involving Dashboard Revenue tracking (status collisions) and missing storefront context consumption for StoreSettings. Safe Prisma db push deployment plan established.

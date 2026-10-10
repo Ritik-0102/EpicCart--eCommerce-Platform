@@ -73,7 +73,50 @@ const getProductReviews = async (req, res, next) => {
   }
 };
 
+// @desc    Get all reviews
+// @route   GET /api/admin/reviews
+// @access  Private/Admin
+const getAllReviewsAdmin = async (req, res, next) => {
+  try {
+    const reviews = await prisma.review.findMany({
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        product: { select: { id: true, name: true } }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    res.status(200).json({ success: true, data: reviews });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Delete a review
+// @route   DELETE /api/admin/reviews/:id
+// @access  Private/Admin
+const deleteReviewAdmin = async (req, res, next) => {
+  try {
+    const reviewId = parseInt(req.params.id);
+    if (isNaN(reviewId)) {
+      return res.status(400).json({ success: false, message: 'Invalid review ID format' });
+    }
+
+    await prisma.review.delete({
+      where: { id: reviewId }
+    });
+
+    res.status(200).json({ success: true, message: 'Review deleted successfully' });
+  } catch (error) {
+    if (error.code === 'P2025') {
+      return res.status(404).json({ success: false, message: 'Review not found' });
+    }
+    next(error);
+  }
+};
+
 module.exports = {
   createReview,
-  getProductReviews
+  getProductReviews,
+  getAllReviewsAdmin,
+  deleteReviewAdmin
 };

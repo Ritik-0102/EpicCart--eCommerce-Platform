@@ -35,7 +35,13 @@ const AdminProducts = () => {
     stock: '',
     categoryId: '',
     imageUrl: '',
-    imagePublicId: ''
+    imagePublicId: '',
+    sku: '',
+    slug: '',
+    lowStockThreshold: 5,
+    isPublished: true,
+    isFeatured: false,
+    isArchived: false
   });
   
   // Image Upload State
@@ -103,7 +109,13 @@ const AdminProducts = () => {
         stock: product.stock,
         categoryId: product.categoryId,
         imageUrl: product.imageUrl || '',
-        imagePublicId: product.imagePublicId || ''
+        imagePublicId: product.imagePublicId || '',
+        sku: product.sku || '',
+        slug: product.slug || '',
+        lowStockThreshold: product.lowStockThreshold || 5,
+        isPublished: product.isPublished !== undefined ? product.isPublished : true,
+        isFeatured: product.isFeatured || false,
+        isArchived: product.isArchived || false
       });
       setImagePreview(product.imageUrl);
     } else {
@@ -115,7 +127,13 @@ const AdminProducts = () => {
         stock: '',
         categoryId: categories.length > 0 ? categories[0].id : '',
         imageUrl: '',
-        imagePublicId: ''
+        imagePublicId: '',
+        sku: '',
+        slug: '',
+        lowStockThreshold: 5,
+        isPublished: true,
+        isFeatured: false,
+        isArchived: false
       });
       setImagePreview(null);
     }
@@ -130,8 +148,11 @@ const AdminProducts = () => {
   };
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? checked : value 
+    }));
   };
 
   const handleImageChange = (e) => {
@@ -172,7 +193,13 @@ const AdminProducts = () => {
         stock: parseInt(formData.stock),
         categoryId: parseInt(formData.categoryId),
         imageUrl: finalImageUrl,
-        imagePublicId: finalImagePublicId
+        imagePublicId: finalImagePublicId,
+        sku: formData.sku || undefined,
+        slug: formData.slug || undefined,
+        lowStockThreshold: parseInt(formData.lowStockThreshold) || 5,
+        isPublished: formData.isPublished,
+        isFeatured: formData.isFeatured,
+        isArchived: formData.isArchived
       };
 
       // 3. Save to DB
@@ -351,20 +378,70 @@ const AdminProducts = () => {
                 </div>
               </div>
               
-              <div>
-                <label className="block font-medium mb-1">Category</label>
-                <select 
-                  name="categoryId"
-                  value={formData.categoryId}
-                  onChange={handleInputChange}
-                  required
-                  className="w-full border rounded p-2"
-                >
-                  <option value="" disabled>Select a category</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-medium mb-1">SKU</label>
+                  <input 
+                    type="text"
+                    name="sku"
+                    value={formData.sku}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Slug</label>
+                  <input 
+                    type="text"
+                    name="slug"
+                    value={formData.slug}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-medium mb-1">Category</label>
+                  <select 
+                    name="categoryId"
+                    value={formData.categoryId}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full border rounded p-2"
+                  >
+                    <option value="" disabled>Select a category</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Low Stock Alert</label>
+                  <input 
+                    type="number"
+                    name="lowStockThreshold"
+                    value={formData.lowStockThreshold}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                  />
+                </div>
+              </div>
+
+              <div className="flex space-x-4 mb-2">
+                <label className="flex items-center">
+                  <input type="checkbox" name="isPublished" checked={formData.isPublished} onChange={handleInputChange} className="mr-2" />
+                  Published
+                </label>
+                <label className="flex items-center">
+                  <input type="checkbox" name="isFeatured" checked={formData.isFeatured} onChange={handleInputChange} className="mr-2" />
+                  Featured
+                </label>
+                <label className="flex items-center">
+                  <input type="checkbox" name="isArchived" checked={formData.isArchived} onChange={handleInputChange} className="mr-2" />
+                  Archived
+                </label>
               </div>
               
               <div>

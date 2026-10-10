@@ -29,37 +29,46 @@ const AdminDashboard = () => {
     return <Navigate to="/login" replace />;
   }
 
-  if (loading) return <div className="p-8 text-center">Loading dashboard...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">Error: {error}</div>;
+  if (loading) return <div style={{ padding: '30px', textAlign: 'center' }}>Loading dashboard...</div>;
+  if (error) return <div style={{ padding: '30px', textAlign: 'center', color: 'red' }}>Error: {error}</div>;
 
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+    <div style={{ padding: '20px' }}>
+      <h1 style={{ fontSize: '1.8rem', marginBottom: '20px' }}>Admin Dashboard</h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h2 className="text-lg text-gray-500 mb-2">Total Products</h2>
-          <p className="text-4xl font-bold">{summary?.totalProducts || 0}</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+        <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>Total Products</h2>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{summary?.totalProducts || 0}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h2 className="text-lg text-gray-500 mb-2">Total Orders</h2>
-          <p className="text-4xl font-bold">{summary?.totalOrders || 0}</p>
+        <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>Total Orders</h2>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{summary?.totalOrders || 0}</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h2 className="text-lg text-gray-500 mb-2">Total Users</h2>
-          <p className="text-4xl font-bold">{summary?.totalUsers || 0}</p>
+        <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>Total Users</h2>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>{summary?.totalUsers || 0}</p>
+        </div>
+        <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>Total Revenue</h2>
+          <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>
+            ${(summary?.totalRevenue || 0).toFixed(2)}
+          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h2 className="text-xl font-bold mb-4">Quick Links</h2>
-          <ul className="space-y-3">
-            <li>
-              <a href="/admin/products" className="text-indigo-600 hover:underline">Manage Products & Inventory</a>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px' }}>
+        <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '15px' }}>Quick Links</h2>
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            <li style={{ marginBottom: '10px' }}>
+              <a href="/admin/products" style={{ color: '#2563eb', textDecoration: 'none' }}>Manage Products & Inventory</a>
             </li>
-            <li>
-              <a href="/admin/orders" className="text-indigo-600 hover:underline">Manage Orders</a>
+            <li style={{ marginBottom: '10px' }}>
+              <a href="/admin/orders" style={{ color: '#2563eb', textDecoration: 'none' }}>Manage Orders</a>
+            </li>
+            <li style={{ marginBottom: '10px' }}>
+              <a href="/admin/customers" style={{ color: '#2563eb', textDecoration: 'none' }}>Manage Customers</a>
             </li>
           </ul>
         </div>
