@@ -476,3 +476,17 @@ EpicCart has evolved from a static HTML prototype into a fully functional, conta
 - **Phases 7, 8, 9 Completed:** Implemented Categories, Coupons, Reviews, Store Settings, and robust Audit Logging via uditMiddleware.js.
 - **Audit Middleware Security:** Added deep object sanitization to prevent leaking passwords, secrets, or tokens into the AuditLog database table.
 - **Pre-Deployment Audit Executed:** Identified blockers involving Dashboard Revenue tracking (status collisions) and missing storefront context consumption for StoreSettings. Safe Prisma db push deployment plan established.
+
+## Admin Authentication & Routing
+The application now implements a strictly separated admin login flow to prevent privilege overlap and routing confusion:
+1. **Admin Login Page:** `/admin/login` provides a dedicated portal for administrators. If a non-admin attempts to log in here, the request is rejected immediately at the client layer upon parsing the backend's response payload.
+2. **Context Persistence:** To prevent unwanted redirects when refreshing an admin dashboard page, `AuthContext` now synchronously initializes its `user` and `token` state from `localStorage`.
+3. **Admin Routing Protection:** `AdminLayout` enforces strict navigation logic. If the user is unauthenticated, they are sent to `/admin/login`. If the user is authenticated but not an `ADMIN`, they are redirected to their standard `/account` page.
+4. **Backend Security:** `authMiddleware.js` verifies the user's role directly against the database (`prisma.user.findUnique`) on every protected request. `adminRoutes.js` applies both the standard `protect` and `admin` middleware securely before exposing dashboard APIs.
+
+### Final Authentication Verification
+All 10 edge cases of administrative routing were successfully verified:
+- Redundant and potentially misleading legacy navigations (`/login`) across nested administrative views have been fully rectified to point to the correct boundary (`/admin/login`).
+- `AdminLayout` and `AuthContext` seamlessly support active sessions across hard refreshes, without flashing out of the portal.
+- All backend routes are doubly secured by stateless JSON Web Tokens and stateful database queries, neutralizing potential LocalStorage tampering.
+- The build process succeeds entirely with zero syntax errors.

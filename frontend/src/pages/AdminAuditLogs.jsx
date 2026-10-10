@@ -28,7 +28,7 @@ const AdminAuditLogs = () => {
   };
 
   if (!user || user.role !== 'ADMIN') {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   if (loading) return <div style={{ padding: '30px', textAlign: 'center' }}>Loading audit logs...</div>;

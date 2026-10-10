@@ -18,6 +18,7 @@ import Orders from './pages/Orders';
 import OrderDetails from './pages/OrderDetails';
 import Checkout from './pages/Checkout';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
 import AdminSetup from './pages/AdminSetup';
@@ -57,6 +58,9 @@ function App() {
         <Route path="/faq" element={<InfoPage title="Frequently Asked Questions" />} />
         <Route path="/shipping" element={<InfoPage title="Shipping Information" />} />
         <Route path="/returns" element={<InfoPage title="Returns Policy" />} />
+        
+        {/* Admin Login Route */}
+        <Route path="/admin/login" element={<AdminLogin />} />
         
         {/* Admin Setup Route (One-time) */}
         <Route path="/admin/setup" element={<AdminSetup />} />

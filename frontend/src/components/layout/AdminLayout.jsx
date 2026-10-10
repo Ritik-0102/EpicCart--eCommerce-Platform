@@ -5,8 +5,12 @@ import { AuthContext } from '../../context/AuthContext';
 const AdminLayout = () => {
   const { user } = useContext(AuthContext);
 
-  if (!user || user.role !== 'ADMIN') {
-    return <Navigate to="/login" replace />;
+  if (!user) {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  if (user.role !== 'ADMIN') {
+    return <Navigate to="/account" replace />;
   }
 
   const navLinkStyle = ({ isActive }) => ({

@@ -1,17 +1,24 @@
-import React, { useState, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useContext, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { loginUser } from '../services/api';
 import './Auth.css'; // We'll share CSS between Login and Register
 
-const Login = () => {
+const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login } = useContext(AuthContext);
+  const { user, login } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // If already logged in as admin, redirect to dashboard
+  useEffect(() => {
+    if (user && user.role === 'ADMIN') {
+      navigate('/admin');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,15 +29,16 @@ const Login = () => {
       // Attempt to login using the API service
       const data = await loginUser({ email, password });
       
+      // Ensure the logged in user is actually an admin
+      if (data.role !== 'ADMIN') {
+        throw new Error('Access denied. Administrator privileges required.');
+      }
+      
       // Save the user (including role) and token to our global AuthContext
       login({ id: data.id, name: data.name, email: data.email, role: data.role }, data.token);
       
-      // Redirect to the appropriate dashboard
-      if (data.role === 'ADMIN') {
-        navigate('/admin');
-      } else {
-        navigate('/account');
-      }
+      // Redirect to the admin dashboard after successful login
+      navigate('/admin');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -40,15 +48,15 @@ const Login = () => {
 
   return (
     <main className="auth-page container">
-      <div className="auth-box">
-        <h1 className="auth-title">Welcome Back</h1>
-        <p className="auth-subtitle">Login to your EpicCart account</p>
+      <div className="auth-box" style={{ borderTop: '4px solid #1e293b' }}>
+        <h1 className="auth-title">Admin Portal</h1>
+        <p className="auth-subtitle">Login to access the EpicCart dashboard</p>
 
         {error && <div className="auth-error">⚠️ {error}</div>}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="email">Admin Email</label>
             <input 
               type="email" 
               id="email" 
@@ -69,18 +77,14 @@ const Login = () => {
             />
           </div>
 
-          <button type="submit" className="auth-submit-btn" disabled={isLoading}>
-            {isLoading ? 'Logging in...' : 'Login'}
+          <button type="submit" className="auth-submit-btn" disabled={isLoading} style={{ backgroundColor: '#1e293b' }}>
+            {isLoading ? 'Authenticating...' : 'Secure Login'}
           </button>
         </form>
-
-        <p className="auth-redirect">
-          Don't have an account? <Link to="/register">Register here</Link>
-        </p>
       </div>
     </main>
   );
 };
 
-export default Login;
+export default AdminLogin;
 
