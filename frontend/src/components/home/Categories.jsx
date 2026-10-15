@@ -5,9 +5,12 @@ import './Categories.css';
 
 // Map category names to icons (SVG-safe emoji alternatives)
 const CATEGORY_ICONS = {
-  'Electronics': '📱',
+  'Electronics': '💻',
+  'Mobile': '📱',
   'Clothing': '👗',
   'Home & Kitchen': '🏠',
+  'Food & Groceries': '🍎',
+  'Furniture': '🛋️',
   'Sports & Outdoors': '⚽',
 };
 

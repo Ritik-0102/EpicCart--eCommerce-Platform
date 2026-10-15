@@ -6,9 +6,20 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
  * Reusable function to fetch products from the backend.
  * Throws an error if the response is not ok, which allows components to display error states.
  */
-export const fetchProducts = async () => {
+export const fetchProducts = async (params = null) => {
   try {
-    const response = await fetch(`${API_URL}/products`);
+    let url = `${API_URL}/products`;
+    if (params && typeof params === 'object') {
+      const sp = new URLSearchParams();
+      for (const [k, v] of Object.entries(params)) {
+        if (v !== undefined && v !== null && v !== '') {
+          sp.append(k, v);
+        }
+      }
+      const qs = sp.toString();
+      if (qs) url += `?${qs}`;
+    }
+    const response = await fetch(url);
     const data = await response.json();
     
     // Check if the API returned an HTTP error (e.g. 500 Internal Server Error)

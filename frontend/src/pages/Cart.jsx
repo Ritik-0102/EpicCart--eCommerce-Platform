@@ -49,6 +49,7 @@ const Cart = () => {
                 src={item.product.imageUrl || 'https://via.placeholder.com/100'} 
                 alt={item.product.name} 
                 className="cart-item-image"
+                onError={(e) => { e.target.src = 'https://via.placeholder.com/100?text=No+Image'; }}
               />
               <div className="cart-item-details">
                 <Link to={`/products/${item.product.id}`}>

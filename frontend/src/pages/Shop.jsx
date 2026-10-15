@@ -7,6 +7,53 @@ import { AuthContext } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import './Shop.css';
 
+const CATEGORY_METADATA = {
+  'electronics': {
+    name: 'Electronics',
+    icon: '💻',
+    tagline: 'Cutting-edge computing, studio acoustics, 4K displays, and smart gadgets.',
+    gradient: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)'
+  },
+  'mobile': {
+    name: 'Mobile',
+    icon: '📱',
+    tagline: 'Flagship smartphones, performance 5G devices, GaN fast chargers, and accessories.',
+    gradient: 'linear-gradient(135deg, #4c1d95 0%, #8b5cf6 100%)'
+  },
+  'clothing': {
+    name: 'Clothing & Apparel',
+    icon: '👗',
+    tagline: 'Contemporary fashion, designer streetwear, ethnic styles, and premium activewear.',
+    gradient: 'linear-gradient(135deg, #831843 0%, #ec4899 100%)'
+  },
+  'home & kitchen': {
+    name: 'Home & Kitchen',
+    icon: '🏠',
+    tagline: 'Tri-ply stainless cookware, intelligent kitchen appliances, decor, and luxury dining.',
+    gradient: 'linear-gradient(135deg, #78350f 0%, #f59e0b 100%)'
+  },
+  'food & groceries': {
+    name: 'Food & Groceries',
+    icon: '🍎',
+    tagline: 'Organic farm staples, heritage grains, whole spices, cold-pressed oils, and gourmet dry fruits.',
+    gradient: 'linear-gradient(135deg, #14532d 0%, #22c55e 100%)'
+  },
+  'furniture': {
+    name: 'Furniture & Living',
+    icon: '🛋️',
+    tagline: 'Handcrafted solid wood living room essentials, ergonomic workstations, and bedroom comfort.',
+    gradient: 'linear-gradient(135deg, #451a03 0%, #d97706 100%)'
+  },
+  'sports & outdoors': {
+    name: 'Sports & Outdoors',
+    icon: '⚽',
+    tagline: 'High-grade fitness equipment, team sports gear, outdoor camping equipment, and accessories.',
+    gradient: 'linear-gradient(135deg, #064e3b 0%, #10b981 100%)'
+  }
+};
+
+const ITEMS_PER_PAGE = 24;
+
 const Shop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   
@@ -24,7 +71,10 @@ const Shop = () => {
   // Local state for UI filters
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
+  const [priceBracket, setPriceBracket] = useState('all');
+  const [inStockOnly, setInStockOnly] = useState(false);
   const [sort, setSort] = useState('newest'); 
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Load products and categories on mount
   useEffect(() => {
@@ -49,6 +99,7 @@ const Shop = () => {
   // Update URL when search changes
   const handleSearchChange = (e) => {
     setSearch(e.target.value);
+    setCurrentPage(1);
     setSearchParams(prev => {
       if (e.target.value) prev.set('search', e.target.value);
       else prev.delete('search');
@@ -58,9 +109,11 @@ const Shop = () => {
 
   // Update URL when category filter changes
   const handleCategoryChange = (e) => {
-    setSelectedCategory(e.target.value);
+    const catVal = e.target.value;
+    setSelectedCategory(catVal);
+    setCurrentPage(1);
     setSearchParams(prev => {
-      if (e.target.value) prev.set('category', e.target.value);
+      if (catVal) prev.set('category', catVal);
       else prev.delete('category');
       return prev;
     });
@@ -70,6 +123,7 @@ const Shop = () => {
   useEffect(() => {
     setSearch(searchParams.get('search') || '');
     setSelectedCategory(searchParams.get('category') || '');
+    setCurrentPage(1);
   }, [searchParams]);
 
   // Add to cart handler (stops link click propagation)
@@ -122,84 +176,192 @@ const Shop = () => {
     }
   };
 
-  // --- Filtering and sorting (derived state, no extra renders) ---
+  // --- Filtering and sorting (derived state) ---
   let displayedProducts = [...allProducts];
 
-  if (search) {
-    const q = search.toLowerCase();
+  // 1. Search Filter
+  if (search && search.trim()) {
+    const q = search.trim().toLowerCase();
     displayedProducts = displayedProducts.filter(p => 
       p.name.toLowerCase().includes(q) || 
       (p.description && p.description.toLowerCase().includes(q))
     );
   }
 
+  // 2. Category Filter
   if (selectedCategory) {
+    const catLower = selectedCategory.toLowerCase();
     displayedProducts = displayedProducts.filter(p => {
-      // Match by category name (case-insensitive) or by category ID string
       if (p.categoryId?.toString() === selectedCategory) return true;
-      if (p.category?.name?.toLowerCase() === selectedCategory.toLowerCase()) return true;
-      if (p.category?.slug?.toLowerCase() === selectedCategory.toLowerCase()) return true;
+      if (p.category?.name?.toLowerCase() === catLower) return true;
+      if (p.category?.slug?.toLowerCase() === catLower) return true;
       return false;
     });
   }
 
+  // 3. Price Bracket Filter
+  if (priceBracket === 'under_500') {
+    displayedProducts = displayedProducts.filter(p => p.price < 500);
+  } else if (priceBracket === '500_2000') {
+    displayedProducts = displayedProducts.filter(p => p.price >= 500 && p.price <= 2000);
+  } else if (priceBracket === '2000_10000') {
+    displayedProducts = displayedProducts.filter(p => p.price > 2000 && p.price <= 10000);
+  } else if (priceBracket === 'above_10000') {
+    displayedProducts = displayedProducts.filter(p => p.price > 10000);
+  }
+
+  // 4. In-Stock Filter
+  if (inStockOnly) {
+    displayedProducts = displayedProducts.filter(p => p.stock > 0);
+  }
+
+  // 5. Sorting
   if (sort === 'price_asc') {
     displayedProducts.sort((a, b) => a.price - b.price);
   } else if (sort === 'price_desc') {
     displayedProducts.sort((a, b) => b.price - a.price);
+  } else if (sort === 'name_asc') {
+    displayedProducts.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sort === 'name_desc') {
+    displayedProducts.sort((a, b) => b.name.localeCompare(a.name));
   } else {
     // newest — higher id is newer
     displayedProducts.sort((a, b) => b.id - a.id);
   }
 
+  // Pagination calculation
+  const totalPages = Math.ceil(displayedProducts.length / ITEMS_PER_PAGE) || 1;
+  const paginatedProducts = displayedProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const activeCategoryMeta = selectedCategory ? CATEGORY_METADATA[selectedCategory.toLowerCase()] : null;
+
   return (
     <div className="shop-page container">
-      <h1 className="page-title">Shop All Products</h1>
+      {/* Category Hero Banner if Category Selected */}
+      {activeCategoryMeta ? (
+        <div 
+          className="category-hero-banner"
+          style={{ background: activeCategoryMeta.gradient }}
+        >
+          <div className="banner-content">
+            <span className="banner-icon">{activeCategoryMeta.icon}</span>
+            <div className="banner-text">
+              <h1 className="banner-title">{activeCategoryMeta.name}</h1>
+              <p className="banner-tagline">{activeCategoryMeta.tagline}</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="shop-header">
+          <h1 className="page-title">Shop All Products</h1>
+          <p className="page-subtitle">Discover thousands of premium curated products with fast delivery across India</p>
+        </div>
+      )}
 
-      {/* Filter + sort controls */}
+      {/* Discovery Controls Bar */}
       <div className="discovery-controls">
-        <input 
-          type="text" 
-          placeholder="Search products..." 
-          value={search} 
-          onChange={handleSearchChange} 
-          className="search-input"
-          aria-label="Search products"
-        />
+        <div className="controls-row-top">
+          <input 
+            type="text" 
+            placeholder="Search products by title, specs or keyword..." 
+            value={search} 
+            onChange={handleSearchChange} 
+            className="search-input"
+            aria-label="Search products"
+          />
 
-        <select 
-          value={selectedCategory} 
-          onChange={handleCategoryChange}
-          className="filter-select"
-          aria-label="Filter by category"
-        >
-          <option value="">All Categories</option>
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.name.toLowerCase()}>{cat.name}</option>
-          ))}
-        </select>
+          <select 
+            value={selectedCategory} 
+            onChange={handleCategoryChange}
+            className="filter-select"
+            aria-label="Filter by category"
+          >
+            <option value="">All Categories ({categories.length})</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.name.toLowerCase()}>{cat.name}</option>
+            ))}
+          </select>
+        </div>
 
-        <select 
-          value={sort} 
-          onChange={(e) => setSort(e.target.value)}
-          className="sort-select"
-          aria-label="Sort products"
-        >
-          <option value="newest">Newest Arrivals</option>
-          <option value="price_asc">Price: Low to High</option>
-          <option value="price_desc">Price: High to Low</option>
-        </select>
+        <div className="controls-row-bottom">
+          {/* Price Range Filter */}
+          <div className="filter-group">
+            <label htmlFor="price-bracket-select" className="filter-label">Price:</label>
+            <select
+              id="price-bracket-select"
+              value={priceBracket}
+              onChange={(e) => { setPriceBracket(e.target.value); setCurrentPage(1); }}
+              className="filter-select-sm"
+              aria-label="Filter by price range"
+            >
+              <option value="all">All Prices</option>
+              <option value="under_500">Under ₹500</option>
+              <option value="500_2000">₹500 - ₹2,000</option>
+              <option value="2000_10000">₹2,000 - ₹10,000</option>
+              <option value="above_10000">Above ₹10,000</option>
+            </select>
+          </div>
+
+          {/* Sort Control */}
+          <div className="filter-group">
+            <label htmlFor="sort-select" className="filter-label">Sort:</label>
+            <select 
+              id="sort-select"
+              value={sort} 
+              onChange={(e) => { setSort(e.target.value); setCurrentPage(1); }}
+              className="sort-select"
+              aria-label="Sort products"
+            >
+              <option value="newest">Newest Arrivals</option>
+              <option value="price_asc">Price: Low to High</option>
+              <option value="price_desc">Price: High to Low</option>
+              <option value="name_asc">Name: A to Z</option>
+              <option value="name_desc">Name: Z to A</option>
+            </select>
+          </div>
+
+          {/* In-Stock Toggle */}
+          <label className="checkbox-label" title="Show only available products with active stock">
+            <input
+              type="checkbox"
+              checked={inStockOnly}
+              onChange={(e) => { setInStockOnly(e.target.checked); setCurrentPage(1); }}
+            />
+            <span>In Stock Only</span>
+          </label>
+        </div>
       </div>
 
-      {/* Result count */}
-      {!isLoading && !error && displayedProducts.length > 0 && (
-        <p className="result-count">
-          {displayedProducts.length} product{displayedProducts.length !== 1 ? 's' : ''} found
-        </p>
+      {/* Result count & Active filters info */}
+      {!isLoading && !error && (
+        <div className="results-header">
+          <p className="result-count">
+            Showing {displayedProducts.length > 0 ? (currentPage - 1) * ITEMS_PER_PAGE + 1 : 0}–
+            {Math.min(currentPage * ITEMS_PER_PAGE, displayedProducts.length)} of {displayedProducts.length} product{displayedProducts.length !== 1 ? 's' : ''}
+          </p>
+          {(search || selectedCategory || priceBracket !== 'all' || inStockOnly) && (
+            <button
+              className="clear-filters-link"
+              onClick={() => {
+                setSearch('');
+                setSelectedCategory('');
+                setPriceBracket('all');
+                setInStockOnly(false);
+                setSearchParams({});
+                setCurrentPage(1);
+              }}
+            >
+              ✕ Clear All Filters
+            </button>
+          )}
+        </div>
       )}
 
       {/* States */}
-      {isLoading && <div className="status-message loading">Loading products...</div>}
+      {isLoading && <div className="status-message loading">Loading catalogue...</div>}
       {error && !isLoading && (
         <div className="status-message error">
           <p>Failed to load products.</p>
@@ -209,65 +371,114 @@ const Shop = () => {
       {!isLoading && !error && displayedProducts.length === 0 && (
         <div className="status-message empty">
           <p>No products found matching your criteria.</p>
-          {(search || selectedCategory) && (
-            <button
-              className="btn btn-secondary"
-              onClick={() => {
-                setSearch('');
-                setSelectedCategory('');
-                setSearchParams({});
-              }}
-            >
-              Clear Filters
-            </button>
-          )}
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
+              setSearch('');
+              setSelectedCategory('');
+              setPriceBracket('all');
+              setInStockOnly(false);
+              setSearchParams({});
+              setCurrentPage(1);
+            }}
+          >
+            Clear Filters
+          </button>
         </div>
       )}
 
       {/* Product grid */}
-      {!isLoading && !error && displayedProducts.length > 0 && (
-        <div className="products-grid">
-          {displayedProducts.map((product) => (
-            <div key={product.id} className="product-card-wrapper">
-              <Link to={`/products/${product.id}`} className="product-card shop-product-card">
-                <div className="product-image-container">
-                  <img 
-                    src={product.imageUrl || 'https://via.placeholder.com/500?text=No+Image'} 
-                    alt={product.name} 
-                    className="product-image"
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/500?text=No+Image'; }}
-                  />
-                  {/* Wishlist heart button — does NOT navigate */}
+      {!isLoading && !error && paginatedProducts.length > 0 && (
+        <>
+          <div className="products-grid">
+            {paginatedProducts.map((product) => {
+              const isOutOfStock = product.stock === 0;
+              const isLowStock = product.stock > 0 && product.stock <= (product.lowStockThreshold || 5);
+
+              return (
+                <div key={product.id} className="product-card-wrapper">
+                  <Link to={`/products/${product.id}`} className="product-card shop-product-card">
+                    <div className="product-image-container">
+                      <img 
+                        src={product.imageUrl || 'https://via.placeholder.com/500?text=No+Image'} 
+                        alt={product.name} 
+                        className="product-image"
+                        loading="lazy"
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/500?text=No+Image'; }}
+                      />
+
+                      {/* Stock badges */}
+                      {isOutOfStock && <span className="stock-badge out-of-stock">Out of Stock</span>}
+                      {isLowStock && <span className="stock-badge low-stock">Only {product.stock} left</span>}
+
+                      {/* Wishlist heart button — does NOT navigate */}
+                      <button
+                        className={`wishlist-btn${isInWishlist(product.id) ? ' in-wishlist' : ''}`}
+                        onClick={(e) => handleWishlistToggle(e, product)}
+                        aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                        title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                      >
+                        {isInWishlist(product.id) ? '♥' : '♡'}
+                      </button>
+                    </div>
+                    <div className="product-info">
+                      <p className="product-category-label">{product.category?.name || 'General'}</p>
+                      <h3 className="product-name" title={product.name}>{product.name}</h3>
+                      <div className="product-price-row">
+                        <span className="current-price">
+                          ₹{parseFloat(product.price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+
+                  {/* Add to Cart button */}
                   <button
-                    className={`wishlist-btn${isInWishlist(product.id) ? ' in-wishlist' : ''}`}
-                    onClick={(e) => handleWishlistToggle(e, product)}
-                    aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                    title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                    className={`add-to-cart-btn shop-add-btn${isOutOfStock ? ' disabled-btn' : ''}`}
+                    onClick={(e) => handleAddToCart(e, product)}
+                    disabled={addingToCart[product.id] || isOutOfStock}
+                    aria-label={isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
                   >
-                    {isInWishlist(product.id) ? '♥' : '♡'}
+                    {isOutOfStock ? 'Sold Out' : (addingToCart[product.id] ? 'Adding...' : '🛒 Add to Cart')}
                   </button>
                 </div>
-                <div className="product-info">
-                  <p className="product-category-label">{product.category?.name || 'General'}</p>
-                  <h3 className="product-name">{product.name}</h3>
-                  <div className="product-price-row">
-                    <span className="current-price">₹{parseFloat(product.price).toFixed(2)}</span>
-                  </div>
-                </div>
-              </Link>
+              );
+            })}
+          </div>
 
-              {/* Add to Cart button outside the Link to avoid nested interactive elements */}
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="pagination-bar" role="navigation" aria-label="Pagination Navigation">
               <button
-                className="add-to-cart-btn shop-add-btn"
-                onClick={(e) => handleAddToCart(e, product)}
-                disabled={addingToCart[product.id]}
-                aria-label={`Add ${product.name} to cart`}
+                className="pagination-btn prev-btn"
+                onClick={() => {
+                  setCurrentPage(prev => Math.max(prev - 1, 1));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                disabled={currentPage === 1}
+                aria-label="Previous Page"
               >
-                {addingToCart[product.id] ? 'Adding...' : '🛒 Add to Cart'}
+                ← Prev
+              </button>
+
+              <div className="pagination-info">
+                Page <span className="current-page-num">{currentPage}</span> of {totalPages}
+              </div>
+
+              <button
+                className="pagination-btn next-btn"
+                onClick={() => {
+                  setCurrentPage(prev => Math.min(prev + 1, totalPages));
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                disabled={currentPage === totalPages}
+                aria-label="Next Page"
+              >
+                Next →
               </button>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
     </div>
   );

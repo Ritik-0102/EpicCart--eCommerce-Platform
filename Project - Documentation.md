@@ -490,3 +490,42 @@ All 10 edge cases of administrative routing were successfully verified:
 - `AdminLayout` and `AuthContext` seamlessly support active sessions across hard refreshes, without flashing out of the portal.
 - All backend routes are doubly secured by stateless JSON Web Tokens and stateful database queries, neutralizing potential LocalStorage tampering.
 - The build process succeeds entirely with zero syntax errors.
+
+---
+
+### Day 22: Premium E-Commerce Catalog Expansion & Safe Bulk Seeding
+- **Catalog Dataset Generation:**
+  - Designed, formatted, and modularized 696 high-quality catalog products across 7 categories into `backend/prisma/catalogData/`:
+    - `electronics.js`: 95 items (Laptops, monitors, smart home, audio gear, peripherals)
+    - `clothing.js`: 95 items (Streetwear, formal, ethnic, activewear, footwear)
+    - `homeAndKitchen.js`: 95 items (Tri-ply cookware, appliances, knives, decor, dining)
+    - `sportsAndOutdoors.js`: 95 items (Fitness weights, cricket, football, racquet sports, camping)
+    - `mobile.js`: 100 items (Smartphones, 5G handsets, GaN chargers, cases, audio)
+    - `foodAndGroceries.js`: 100 items (Organic staples, rice, spices, cold-pressed oils, dry fruits)
+    - `furniture.js`: 116 items (Sofas, beds, ergonomic desks, dining tables, storage)
+  - Every product contains unique, SEO-friendly slugs, unique SKU codes, rich descriptions, realistic INR pricing, stock counts, low-stock thresholds, and high-resolution Unsplash image assets.
+- **Safe Seeder Architecture (`backend/prisma/seedCatalog.js`):**
+  - **Dry-Run by Default:** Without flags, the script acts in read-only mode, connecting to the database to inspect existing categories, count products, evaluate shortfalls, and project post-seed inventory.
+  - **Multi-Flag Safeguard:** Modifying the production Neon database requires passing BOTH `--write` and `--confirm-production`.
+  - **Idempotency:** Protects existing catalog data by verifying `slug`, `sku`, and name per category before queuing insertions.
+  - **Connection Resilience:** Chunks database operations into batches of 25 with promises to avoid Neon PostgreSQL connection timeouts on free-tier compute.
+- **Storefront & Navigation Enhancements:**
+  - `Navbar.jsx`: Added navigation links for `Mobile`, `Food & Groceries`, and `Furniture`. Fixed top-banner free shipping threshold from `$50` to `₹499`.
+  - `Categories.jsx`: Added distinct emoji mappings (`💻`, `📱`, `👗`, `🏠`, `🍎`, `🛋️`, `⚽`).
+  - `FeaturedProducts.jsx`: Replaced legacy `$` with `₹`.
+  - `Shop.jsx` & `Shop.css`: Added dynamic Category Hero Banners, Price Bracket Filtering (`under_500`, `500_2000`, `2000_10000`, `above_10000`), In-Stock toggle, Sorting (`newest`, `price_asc`, `price_desc`, `name_asc`, `name_desc`), Out of Stock / Low Stock badges, and 24-item paginated grid with smooth scrolling.
+  - `backend/controllers/productController.js`: Added query-level search, category, stock, price, sort, and pagination support with full backward compatibility.
+  - `frontend/src/services/api.js`: Enhanced `fetchProducts` to accept optional query parameter objects.
+- **Verification:**
+  - Dry-run verification against live Neon DB: 4 existing categories (30 products) -> 7 categories (726 products projected). All categories exceed the 100-product requirement.
+  - Node syntax checks (`node -c`): 100% pass across all controller and catalog files.
+  - Vite production build (`npm run build`): Completed in 1.36s with zero errors.
+- **Data Protection Guarantee:** Zero production database writes were executed. Remote database records remain pristine until manual confirmation.
+
+### Day 22 (Part 2): Final Production Seeder Safety Review
+- **Pre-Flight Dataset Validation:** Added automated schema validation into `seedCatalog.js` checking 100% of the 696 items across all 7 categories (required fields, positive prices, non-negative integer stocks, URL-friendly kebab slugs, unique SKUs) prior to any database queries or mutations.
+- **Image Accessibility Audit:** Conducted real-time HTTP GET verification on all 126 unique image URLs across the 696 products. Replaced 9 dead Unsplash URLs (affecting 44 products) with verified working URLs, achieving 100% HTTP 200 image/jpeg availability. Verified frontend error-trapping (`onError`) in `Shop.jsx`, `FeaturedProducts.jsx`, `ProductDetails.jsx`, `Cart.jsx`, and `Wishlist.jsx`.
+- **Rerun & Partial Failure Resilience:** Verified that the script operates with idempotency via slug, SKU, and name matching. If an execution is interrupted midway, previously committed batches remain intact, and a subsequent run skips already-inserted items without collision or duplicate errors.
+- **Production-Write Isolation:** Verified that unless both `--write` and `--confirm-production` are passed as flags, execution is strictly restricted to dry-run mode, and zero mutations (including category upserts) are reachable.
+
+

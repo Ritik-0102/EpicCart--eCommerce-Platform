@@ -58,6 +58,7 @@ const Wishlist = () => {
                 src={item.product.imageUrl || 'https://via.placeholder.com/200'} 
                 alt={item.product.name} 
                 className="wishlist-image"
+                onError={(e) => { e.target.src = 'https://via.placeholder.com/200?text=No+Image'; }}
               />
             </Link>
             <div className="wishlist-details">

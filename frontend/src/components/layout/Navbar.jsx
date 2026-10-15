@@ -26,8 +26,11 @@ const Navbar = () => {
   // Category links use names that exactly match the database (case-insensitive match in Shop.jsx)
   const categoryLinks = [
     { label: 'Electronics', value: 'electronics' },
+    { label: 'Mobile', value: 'mobile' },
     { label: 'Clothing', value: 'clothing' },
     { label: 'Home & Kitchen', value: 'home & kitchen' },
+    { label: 'Food & Groceries', value: 'food & groceries' },
+    { label: 'Furniture', value: 'furniture' },
     { label: 'Sports', value: 'sports & outdoors' },
   ];
 
@@ -35,7 +38,7 @@ const Navbar = () => {
     <header className="navbar-header">
       {/* Announcement Bar */}
       <div className="top-banner">
-        <p>&#x1F69A; Free shipping on orders over $50! <Link to="/products" className="banner-link">Shop Now →</Link></p>
+        <p>&#x1F69A; Free shipping on orders over ₹499! <Link to="/products" className="banner-link">Shop Now →</Link></p>
       </div>
 
       {/* Main Navbar */}

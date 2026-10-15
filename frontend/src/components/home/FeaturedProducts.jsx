@@ -121,7 +121,7 @@ const FeaturedProducts = () => {
               
               <div className="product-price-row">
                 <div className="price-container">
-                  <span className="current-price">${parseFloat(product.price).toFixed(2)}</span>
+                  <span className="current-price">₹{parseFloat(product.price).toFixed(2)}</span>
                 </div>
                 {/* Add to cart button — stops link navigation */}
                 <button

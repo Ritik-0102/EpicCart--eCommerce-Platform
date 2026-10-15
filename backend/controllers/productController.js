@@ -2,14 +2,96 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const cloudinary = require('../config/cloudinary');
 
-// @desc    Get all products
+// @desc    Get all products (with optional search, category, stock, price filtering, sorting, and pagination)
 // @route   GET /api/products
 const getProducts = async (req, res, next) => {
   try {
-    const products = await prisma.product.findMany({
-      include: { category: true } // Include category details in the response
+    const { category, search, featured, inStock, minPrice, maxPrice, sort, page, limit } = req.query;
+
+    const where = {
+      isArchived: false,
+    };
+
+    // Filter by featured
+    if (featured === 'true') {
+      where.isFeatured = true;
+    }
+
+    // Filter by inStock
+    if (inStock === 'true') {
+      where.stock = { gt: 0 };
+    }
+
+    // Filter by price range
+    if (minPrice !== undefined || maxPrice !== undefined) {
+      where.price = {};
+      if (minPrice !== undefined && !isNaN(parseFloat(minPrice))) {
+        where.price.gte = parseFloat(minPrice);
+      }
+      if (maxPrice !== undefined && !isNaN(parseFloat(maxPrice))) {
+        where.price.lte = parseFloat(maxPrice);
+      }
+    }
+
+    // Filter by category (ID or name case-insensitive)
+    if (category) {
+      const parsedCatId = parseInt(category);
+      if (!isNaN(parsedCatId)) {
+        where.categoryId = parsedCatId;
+      } else {
+        where.category = {
+          name: {
+            equals: category,
+            mode: 'insensitive'
+          }
+        };
+      }
+    }
+
+    // Filter by search term
+    if (search && search.trim()) {
+      const searchTerm = search.trim();
+      where.OR = [
+        { name: { contains: searchTerm, mode: 'insensitive' } },
+        { description: { contains: searchTerm, mode: 'insensitive' } }
+      ];
+    }
+
+    // Sorting
+    let orderBy = { id: 'desc' }; // default: newest
+    if (sort === 'price_asc') {
+      orderBy = { price: 'asc' };
+    } else if (sort === 'price_desc') {
+      orderBy = { price: 'desc' };
+    } else if (sort === 'name_asc') {
+      orderBy = { name: 'asc' };
+    } else if (sort === 'newest') {
+      orderBy = { id: 'desc' };
+    }
+
+    // Optional pagination
+    const take = limit ? Math.max(1, parseInt(limit)) : undefined;
+    const skip = page && limit ? Math.max(0, (parseInt(page) - 1) * take) : undefined;
+
+    const [total, products] = await Promise.all([
+      prisma.product.count({ where }),
+      prisma.product.findMany({
+        where,
+        include: { category: true },
+        orderBy,
+        take,
+        skip
+      })
+    ]);
+
+    res.status(200).json({
+      success: true,
+      count: products.length,
+      total,
+      page: page ? parseInt(page) : 1,
+      totalPages: take ? Math.ceil(total / take) : 1,
+      data: products
     });
-    res.status(200).json({ success: true, data: products });
   } catch (error) {
     next(error);
   }
