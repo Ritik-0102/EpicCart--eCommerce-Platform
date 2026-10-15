@@ -1,71 +1,235 @@
-.promotions-section {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-  padding: var(--space-8) var(--space-4);
+/* ==========================================================================
+   EpicCart - Curated Deals & Promotions Section
+   ========================================================================== */
+
+.deals-section {
+  padding: var(--space-12) 0;
+  background-color: #FFFFFF;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.promo-banner {
-  border-radius: var(--radius-lg);
-  padding: var(--space-8);
+.deals-header {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 250px;
-  position: relative;
-  overflow: hidden;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+  gap: var(--space-4);
 }
 
-.primary-promo {
-  background: linear-gradient(135deg, #fef3c7, #fde68a);
-  color: #92400e;
-}
-
-.secondary-promo {
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-  color: #1e3a8a;
-}
-
-.promo-content {
-  position: relative;
-  z-index: 2;
-  max-width: 60%;
-}
-
-.promo-tag {
+.deals-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-size: 0.75rem;
   font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  color: var(--color-danger);
   margin-bottom: var(--space-2);
 }
 
-.promo-banner h2 {
-  font-size: 2rem;
-  font-weight: 800;
-  margin-bottom: var(--space-2);
-  line-height: 1.2;
+.flame-icon {
+  color: var(--color-danger);
 }
 
-.promo-banner p {
-  margin-bottom: var(--space-4);
-  font-weight: 500;
-}
-
-.promo-btn {
-  border-color: currentColor;
-  color: currentColor;
+.deals-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.875rem;
   font-weight: 600;
-  padding: var(--space-2) var(--space-4);
+  color: var(--color-accent);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
 }
 
-.promo-btn:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.deals-view-all:hover {
+  background-color: var(--color-accent-subtle);
+  transform: translateX(2px);
 }
 
-/* Responsive Rules */
-@media (max-width: 768px) {
-  .promotions-section {
-    grid-template-columns: 1fr;
+/* Grid Layout */
+.deals-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .deals-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
+}
+
+@media (min-width: 1024px) {
+  .deals-grid {
+    grid-template-columns: 1.35fr 1fr 1fr;
+  }
+}
+
+/* Shared Deal Card Styling */
+.deal-card {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid var(--color-border);
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  position: relative;
+}
+
+.deal-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.deal-card-content {
+  padding: var(--space-6);
+  z-index: 1;
+}
+
+.deal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-full);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.badge-dark {
+  background-color: rgba(37, 99, 235, 0.2);
+  color: #93C5FD;
+  border: 1px solid rgba(147, 197, 253, 0.3);
+}
+
+.badge-warm {
+  background-color: #FEF3C7;
+  color: #B45309;
+  border: 1px solid #FDE68A;
+}
+
+.badge-slate {
+  background-color: #E2E8F0;
+  color: #334155;
+  border: 1px solid #CBD5E1;
+}
+
+.deal-title {
+  font-size: 1.375rem;
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: var(--space-3);
+  letter-spacing: -0.02em;
+}
+
+.deal-description {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  margin-bottom: var(--space-5);
+}
+
+.deal-benefit-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #60A5FA;
+  margin-bottom: var(--space-5);
+}
+
+.deal-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.875rem;
+  padding: 0.55rem 1.15rem;
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+/* Card Visual Treatments */
+
+/* 1. Feature Card: Deep Navy */
+.deal-feature-card {
+  background: linear-gradient(135deg, #0B1220 0%, #111827 100%);
+  color: #FFFFFF;
+  border-color: #1E293B;
+}
+
+.deal-feature-card .deal-title {
+  color: #FFFFFF;
+  font-size: 1.625rem;
+}
+
+.deal-feature-card .deal-description {
+  color: #94A3B8;
+}
+
+.deal-feature-card .deal-card-image {
+  height: 220px;
+  overflow: hidden;
+  background-color: #0F172A;
+}
+
+.deal-feature-card .deal-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.deal-feature-card:hover .deal-card-image img {
+  transform: scale(1.04);
+}
+
+/* 2. Supporting Card: Warm Ivory */
+.deal-supporting-card.card-warm {
+  background-color: var(--color-bg-warm);
+}
+
+.deal-supporting-card.card-warm .deal-title {
+  color: var(--color-primary);
+}
+
+.deal-supporting-card.card-warm .deal-description {
+  color: var(--color-text-muted);
+}
+
+.deal-supporting-card .deal-card-image {
+  height: 180px;
+  overflow: hidden;
+  background-color: #E2E8F0;
+}
+
+.deal-supporting-card .deal-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.deal-supporting-card:hover .deal-card-image img {
+  transform: scale(1.04);
+}
+
+/* 3. Supporting Card: Clean Slate */
+.deal-supporting-card.card-slate {
+  background-color: var(--color-bg-subtle);
+}
+
+.deal-supporting-card.card-slate .deal-title {
+  color: var(--color-primary);
+}
+
+.deal-supporting-card.card-slate .deal-description {
+  color: var(--color-text-muted);
 }

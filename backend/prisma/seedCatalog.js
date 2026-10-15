@@ -70,7 +70,10 @@ const CATEGORIES_CONFIG = [
   }
 ];
 
-const BATCH_SIZE = 25;
+// Resilient sequential seeding configuration
+const RETRY_MAX_ATTEMPTS = 3;
+const RETRY_BACKOFF_BASE_MS = 2000;
+const PROGRESS_INTERVAL = 10;
 
 function validateDatasets() {
   const allSlugs = new Set();
@@ -145,6 +148,25 @@ async function run() {
   try {
     // 0. Pre-Flight Validation of all datasets
     validateDatasets();
+
+    // 0.1 Warm-up database connection with retry for Neon serverless compute auto-suspend
+    let isDbConnected = false;
+    for (let cAttempt = 1; cAttempt <= RETRY_MAX_ATTEMPTS; cAttempt++) {
+      try {
+        await prisma.$connect();
+        isDbConnected = true;
+        break;
+      } catch (connErr) {
+        if (cAttempt < RETRY_MAX_ATTEMPTS) {
+          const waitMs = cAttempt * RETRY_BACKOFF_BASE_MS;
+          console.warn(`[Neon Warmup] Connecting to database (attempt ${cAttempt}/${RETRY_MAX_ATTEMPTS}). Retrying in ${waitMs}ms...`);
+          await new Promise(res => setTimeout(res, waitMs));
+        } else {
+          console.error(`[DATABASE CONNECTION FAILED] Unable to establish connection to database after ${RETRY_MAX_ATTEMPTS} attempts.`);
+          throw connErr;
+        }
+      }
+    }
 
     // 1. Fetch current database state
     const existingCategories = await prisma.category.findMany({
@@ -304,40 +326,94 @@ async function run() {
       console.log(`[Category] Ensured '${plan.name}' (ID: ${upsertedCat.id})`);
     }
 
-    // Step B: Insert products in batches
+    // Step B: Insert products sequentially with live duplicate tracking and transient retry
+    let globalInsertedCount = 0;
+    let globalSkippedCount = 0;
+
     for (const plan of categoryActionPlan) {
       const catId = categoryIdByName.get(plan.name);
       const items = plan.itemsToInsert;
-      console.log(`\nInserting ${items.length} products into '${plan.name}' (in batches of ${BATCH_SIZE})...`);
+      console.log(`\nInserting ${items.length} products into '${plan.name}' (sequential mode)...`);
 
-      for (let i = 0; i < items.length; i += BATCH_SIZE) {
-        const batch = items.slice(i, i + BATCH_SIZE);
-        
-        await Promise.all(
-          batch.map(item =>
-            prisma.product.create({
-              data: {
-                name: item.name,
-                slug: item.slug,
-                sku: item.sku,
-                description: item.description,
-                price: item.price,
-                stock: item.stock,
-                lowStockThreshold: item.lowStockThreshold || 5,
-                imageUrl: item.imageUrl,
-                isPublished: item.isPublished !== undefined ? item.isPublished : true,
-                isFeatured: item.isFeatured !== undefined ? item.isFeatured : false,
-                isArchived: false,
-                categoryId: catId
-              }
-            })
-          )
-        );
+      let insertedInCat = 0;
+      let skippedInCat = 0;
 
-        const progress = Math.min(i + BATCH_SIZE, items.length);
-        process.stdout.write(`  Inserted ${progress}/${items.length} products\r`);
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const categoryScopedNameKey = `${catId}::${item.name.toLowerCase().trim()}`;
+
+        // Live duplicate verification against dynamically updated sets
+        const isSlugTaken = item.slug && existingSlugs.has(item.slug);
+        const isSkuTaken = item.sku && existingSkus.has(item.sku);
+        const isNameTaken = existingNamesByCategory.has(categoryScopedNameKey);
+
+        if (isSlugTaken || isSkuTaken || isNameTaken) {
+          skippedInCat++;
+          globalSkippedCount++;
+          continue;
+        }
+
+        const productData = {
+          name: item.name,
+          slug: item.slug,
+          sku: item.sku,
+          description: item.description,
+          price: item.price,
+          stock: item.stock,
+          lowStockThreshold: item.lowStockThreshold || 5,
+          imageUrl: item.imageUrl,
+          isPublished: item.isPublished !== undefined ? item.isPublished : true,
+          isFeatured: item.isFeatured !== undefined ? item.isFeatured : false,
+          isArchived: false,
+          categoryId: catId
+        };
+
+        // Sequential insert with automatic retry on transient connection drops
+        let attempt = 0;
+        let createdProduct = null;
+
+        while (attempt < RETRY_MAX_ATTEMPTS) {
+          try {
+            createdProduct = await prisma.product.create({ data: productData });
+            break;
+          } catch (err) {
+            attempt++;
+            const isTransient = err.message && (
+              err.message.includes("Can't reach database server") ||
+              err.message.includes("P1001") ||
+              err.message.includes("Connection lost") ||
+              err.message.includes("ECONNRESET") ||
+              err.message.includes("ETIMEDOUT") ||
+              err.message.includes("closed")
+            );
+
+            if (isTransient && attempt < RETRY_MAX_ATTEMPTS) {
+              const backoffMs = attempt * RETRY_BACKOFF_BASE_MS;
+              console.warn(`  [RETRY] Transient connection error for SKU '${item.sku}' in '${plan.name}' (attempt ${attempt}/${RETRY_MAX_ATTEMPTS}). Retrying in ${backoffMs}ms...`);
+              await new Promise(res => setTimeout(res, backoffMs));
+            } else {
+              console.error(`\n[INSERT FAILED] Category: '${plan.name}' | SKU: '${item.sku}' | Slug: '${item.slug}' | Item: '${item.name}'`);
+              console.error(`  Failure Reason: ${err.message}`);
+              throw err;
+            }
+          }
+        }
+
+        // Dynamically update duplicate tracking sets immediately upon insertion
+        if (createdProduct) {
+          if (createdProduct.slug) existingSlugs.add(createdProduct.slug);
+          if (createdProduct.sku) existingSkus.add(createdProduct.sku);
+          existingNamesByCategory.add(categoryScopedNameKey);
+          insertedInCat++;
+          globalInsertedCount++;
+
+          if (insertedInCat % PROGRESS_INTERVAL === 0 || insertedInCat === items.length) {
+            console.log(`  [Progress] '${plan.name}': ${insertedInCat}/${items.length} products inserted...`);
+          }
+        }
       }
-      console.log(`  Done inserting into '${plan.name}'!`);
+
+      console.log(`  ✓ Completed '${plan.name}': ${insertedInCat} inserted, ${skippedInCat} skipped.`);
     }
 
     // Step C: Verify Final DB Counts

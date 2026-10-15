@@ -1,141 +1,170 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Star, TrendingUp, Sparkles, Flame, Layers } from 'lucide-react';
 import { fetchProducts } from '../../services/api';
-import { CartContext } from '../../context/CartContext';
-import { WishlistContext } from '../../context/WishlistContext';
-import { AuthContext } from '../../context/AuthContext';
-import toast from 'react-hot-toast';
+import ProductCard from '../common/ProductCard';
 import './FeaturedProducts.css';
 
 const FeaturedProducts = () => {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [allFetchedProducts, setAllFetchedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [addingToCart, setAddingToCart] = useState({}); // track per-product loading
-
-  const { addToCart } = useContext(CartContext);
-  const { addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemId } = useContext(WishlistContext);
-  const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('trending');
 
   useEffect(() => {
-    const loadProducts = async () => {
+    let isMounted = true;
+    const loadCatalogProducts = async () => {
       try {
         setIsLoading(true);
-        const data = await fetchProducts();
-        const arr = Array.isArray(data) ? data : (data?.data || []);
-        setFeaturedProducts(arr.slice(0, 4)); // Get first 4 products
+        // Request up to 40 items from production API to curate 10-15 non-overlapping distinct items
+        const data = await fetchProducts({ limit: 40 });
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        
+        if (isMounted) {
+          setAllFetchedProducts(list);
+          setError(null);
+        }
       } catch (err) {
-        setError(err.message);
+        if (isMounted) {
+          setError(err.message || 'Failed to load products');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
-    loadProducts();
+
+    loadCatalogProducts();
+    return () => { isMounted = false; };
   }, []);
 
-  const handleAddToCart = async (e, product) => {
-    // Stop the click from navigating to product details
-    e.preventDefault();
-    e.stopPropagation();
+  // Partition products into non-overlapping, distinct curated groups
+  // Aim: ~10 to 15 distinct products total across the homepage
+  const bestsellers = allFetchedProducts.slice(0, 5);         // 5 products (Items 0-4)
+  const trendingNow = allFetchedProducts.slice(5, 9);         // 4 distinct products (Items 5-8)
+  const categoryPicks = allFetchedProducts.slice(9, 13);      // 4 distinct products (Items 9-12)
+  const allCuratedPicks = allFetchedProducts.slice(5, 13);    // Combined 8 products (Items 5-12)
 
-    if (!user) {
-      toast.error('Please log in to add items to the cart.');
-      navigate('/login');
-      return;
-    }
-
-    setAddingToCart(prev => ({ ...prev, [product.id]: true }));
-    const success = await addToCart(product.id, 1);
-    setAddingToCart(prev => ({ ...prev, [product.id]: false }));
-
-    if (success) {
-      toast.success(`"${product.name}" added to cart!`);
-    } else {
-      toast.error('Failed to add to cart. Please try again.');
-    }
-  };
-
-  const handleWishlistToggle = async (e, product) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!user) {
-      toast.error('Please log in to manage your wishlist.');
-      navigate('/login');
-      return;
-    }
-
-    const inWishlist = isInWishlist(product.id);
-    if (inWishlist) {
-      // Retrieve the wishlist item's row ID (not the product ID)
-      const itemId = getWishlistItemId(product.id);
-      if (itemId) {
-        await removeFromWishlist(itemId);
-        toast.success(`"${product.name}" removed from wishlist.`);
-      }
-    } else {
-      const success = await addToWishlist(product.id);
-      if (success) {
-        toast.success(`"${product.name}" added to wishlist!`);
-      } else {
-        toast.error('Failed to update wishlist.');
-      }
-    }
-  };
-
-  if (isLoading) return <div className="container status-message">Loading featured products...</div>;
-  if (error) return <div className="container status-message error">{error}</div>;
+  // Determine current active secondary tab products
+  const secondaryProducts = activeTab === 'trending' 
+    ? trendingNow 
+    : activeTab === 'category' 
+      ? categoryPicks 
+      : allCuratedPicks;
 
   return (
-    <section className="featured-section container">
-      <div className="section-header">
-        <h2 className="section-title">Featured Products</h2>
-        <Link to="/products" className="view-all">View All</Link>
-      </div>
-      
-      <div className="products-grid">
-        {featuredProducts.map((product) => (
-          <Link to={`/products/${product.id}`} key={product.id} className="product-card">
-            <div className="product-image-container">
-              <img
-                src={product.imageUrl || 'https://via.placeholder.com/500?text=No+Image'}
-                alt={product.name}
-                className="product-image"
-                onError={(e) => { e.target.src = 'https://via.placeholder.com/500?text=No+Image'; }}
-              />
-              {/* Wishlist button — stops link navigation */}
-              <button
-                className={`wishlist-btn${isInWishlist(product.id) ? ' in-wishlist' : ''}`}
-                onClick={(e) => handleWishlistToggle(e, product)}
-                aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+    <section className="merchandising-section" aria-label="Featured Products">
+      <div className="container">
+        
+        {/* ==============================================================
+            SECTION A: POPULAR BESTSELLERS (4-5 Distinct Products)
+            ============================================================== */}
+        <div className="merchandising-block">
+          <div className="block-header">
+            <div>
+              <div className="block-eyebrow">
+                <Star size={14} className="star-icon" fill="#F59E0B" />
+                <span>CUSTOMER FAVORITES</span>
+              </div>
+              <h2 className="section-title">Popular Bestsellers</h2>
+              <p className="section-subtitle">
+                Top-rated customer selections across electronics, apparel, and home essentials.
+              </p>
+            </div>
+            <Link to="/products?sort=rating" className="block-view-all">
+              <span>View All Bestsellers</span>
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          {/* Loading Skeletons */}
+          {isLoading && (
+            <div className="products-grid">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="skeleton-box" style={{ height: '360px' }}></div>
+              ))}
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && !isLoading && (
+            <div className="status-message error">
+              <p>Failed to load featured products: {error}</p>
+            </div>
+          )}
+
+          {/* Products Grid */}
+          {!isLoading && !error && bestsellers.length > 0 && (
+            <div className="products-grid bestsellers-grid">
+              {bestsellers.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* ==============================================================
+            SECTION B: CURATED SPOTLIGHT (Trending & Category Mix)
+            ============================================================== */}
+        <div className="merchandising-block spotlight-block">
+          <div className="block-header spotlight-header">
+            <div>
+              <div className="block-eyebrow">
+                <TrendingUp size={14} className="trending-icon" />
+                <span>CURATED DISCOVERY</span>
+              </div>
+              <h2 className="section-title">Trending Across Store</h2>
+              <p className="section-subtitle">
+                Explore handpicked new arrivals and standout essentials from all departments.
+              </p>
+            </div>
+
+            {/* Interactive Tab Switcher (UIverse Inspired) */}
+            <div className="spotlight-tabs" role="tablist" aria-label="Curated sections">
+              <button 
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'trending'}
+                className={`tab-pill-btn ${activeTab === 'trending' ? 'active' : ''}`}
+                onClick={() => setActiveTab('trending')}
               >
-                {isInWishlist(product.id) ? '♥' : '♡'}
+                <Flame size={14} />
+                <span>Trending Now (4)</span>
+              </button>
+              <button 
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'category'}
+                className={`tab-pill-btn ${activeTab === 'category' ? 'active' : ''}`}
+                onClick={() => setActiveTab('category')}
+              >
+                <Layers size={14} />
+                <span>Picks Across Departments (4)</span>
+              </button>
+              <button 
+                type="button"
+                role="tab"
+                aria-selected={activeTab === 'all'}
+                className={`tab-pill-btn ${activeTab === 'all' ? 'active' : ''}`}
+                onClick={() => setActiveTab('all')}
+              >
+                <Sparkles size={14} />
+                <span>All Spotlight (8)</span>
               </button>
             </div>
-            
-            <div className="product-info">
-              <p className="product-category-label">{product.category?.name || 'General'}</p>
-              <h3 className="product-name">{product.name}</h3>
-              
-              <div className="product-price-row">
-                <div className="price-container">
-                  <span className="current-price">₹{parseFloat(product.price).toFixed(2)}</span>
-                </div>
-                {/* Add to cart button — stops link navigation */}
-                <button
-                  className="add-to-cart-btn"
-                  onClick={(e) => handleAddToCart(e, product)}
-                  disabled={addingToCart[product.id]}
-                  aria-label={`Add ${product.name} to cart`}
-                >
-                  {addingToCart[product.id] ? '...' : 'Add +'}
-                </button>
-              </div>
+          </div>
+
+          {/* Secondary Products Grid */}
+          {!isLoading && !error && secondaryProducts.length > 0 && (
+            <div className="products-grid secondary-grid">
+              {secondaryProducts.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
-          </Link>
-        ))}
+          )}
+        </div>
+
       </div>
     </section>
   );

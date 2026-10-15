@@ -1,100 +1,285 @@
+/* ==========================================================================
+   EpicCart - Hero Section
+   Editorial Asymmetric Merchandising Layout
+   ========================================================================== */
+
 .hero-section {
   background-color: var(--color-bg);
-  padding: var(--space-12) 0;
+  padding: var(--space-8) 0 var(--space-12);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
   overflow: hidden;
 }
 
+@media (min-width: 1024px) {
+  .hero-section {
+    padding: var(--space-12) 0 var(--space-16);
+  }
+}
+
 .hero-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-10);
   align-items: center;
-  gap: var(--space-8);
 }
 
+@media (min-width: 1024px) {
+  .hero-container {
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: var(--space-12);
+  }
+}
+
+/* Left Content Column */
 .hero-content {
-  flex: 1;
-  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-.hero-badge {
-  display: inline-block;
-  padding: var(--space-1) var(--space-3);
-  background-color: #dbeafe; /* Light blue */
-  color: var(--color-accent);
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.35rem 0.85rem;
+  background-color: var(--color-accent-subtle);
+  border: 1px solid rgba(37, 99, 235, 0.2);
   border-radius: var(--radius-full);
-  font-size: 0.875rem;
-  font-weight: 600;
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   margin-bottom: var(--space-4);
+}
+
+.eyebrow-icon {
+  color: var(--color-accent);
 }
 
 .hero-title {
-  font-size: 3rem;
-  font-weight: 800;
-  line-height: 1.1;
+  font-size: 2.25rem;
+  font-weight: 900;
   color: var(--color-primary);
-  margin-bottom: var(--space-4);
-  letter-spacing: -1px;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  margin-bottom: var(--space-5);
 }
 
-.hero-subtitle {
-  font-size: 1.125rem;
-  color: var(--color-text-muted);
-  margin-bottom: var(--space-6);
-  line-height: 1.6;
+@media (min-width: 640px) {
+  .hero-title {
+    font-size: 3rem;
+  }
 }
 
-.hero-buttons {
-  display: flex;
-  gap: var(--space-4);
+@media (min-width: 1024px) {
+  .hero-title {
+    font-size: 3.5rem;
+  }
 }
 
-.hero-btn {
-  padding: var(--space-3) var(--space-6);
-  font-size: 1rem;
-}
-
-.hero-image {
-  flex: 1;
+.hero-title-highlight {
+  color: var(--color-accent);
   position: relative;
 }
 
-.hero-image img {
+.hero-description {
+  font-size: 1.0625rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+  margin-bottom: var(--space-8);
+  max-width: 560px;
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-8);
   width: 100%;
-  max-width: 600px;
-  height: auto;
+}
+
+@media (min-width: 640px) {
+  .hero-actions {
+    width: auto;
+  }
+}
+
+.hero-btn-primary {
+  padding: 0.875rem 1.75rem;
+  font-size: 1rem;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+}
+
+.hero-btn-secondary {
+  padding: 0.875rem 1.75rem;
+  font-size: 1rem;
+  border-radius: var(--radius-lg);
+  background-color: #FFFFFF;
+}
+
+/* Micro Trust Pills */
+.hero-trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border);
+  width: 100%;
+}
+
+.trust-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-main);
+}
+
+.trust-icon {
+  color: var(--color-success);
+}
+
+.trust-icon.star-icon {
+  color: #F59E0B;
+}
+
+/* Right Visual Column */
+.hero-visual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.hero-image-frame {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-primary-dark);
+}
+
+.hero-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-image-frame:hover .hero-main-img {
+  transform: scale(1.03);
+}
+
+.hero-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(11, 18, 32, 0) 60%,
+    rgba(11, 18, 32, 0.35) 100%
+  );
+  pointer-events: none;
+}
+
+/* Floating Merchandising Badges (UIverse Inspired) */
+.hero-floating-badge {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 0.75rem 1rem;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
-  object-fit: cover;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  animation: floatBadge 4s ease-in-out infinite;
+  z-index: 2;
 }
 
-/* Responsive Rules */
-@media (max-width: 992px) {
-  .hero-container {
-    flex-direction: column;
-    text-align: center;
+@keyframes floatBadge {
+  0%, 100% {
+    transform: translateY(0);
   }
-
-  .hero-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .hero-title {
-    font-size: 2.5rem;
+  50% {
+    transform: translateY(-6px);
   }
 }
 
-@media (max-width: 480px) {
-  .hero-title {
-    font-size: 2rem;
+.badge-top-left {
+  top: -15px;
+  left: -10px;
+}
+
+@media (max-width: 640px) {
+  .badge-top-left {
+    top: -10px;
+    left: 10px;
   }
-  
-  .hero-buttons {
-    flex-direction: column;
-    width: 100%;
+}
+
+.badge-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-accent-subtle);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-tag {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  letter-spacing: 0.05em;
+}
+
+.badge-value {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.badge-bottom-right {
+  bottom: -15px;
+  right: -10px;
+  animation-delay: 2s;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+@media (max-width: 640px) {
+  .badge-bottom-right {
+    bottom: -10px;
+    right: 10px;
   }
-  
-  .hero-btn {
-    width: 100%;
-  }
+}
+
+.badge-stars {
+  color: #F59E0B;
+  font-size: 0.875rem;
+  letter-spacing: 2px;
+}
+
+.badge-review-text {
+  font-size: 0.75rem;
+  color: var(--color-text-main);
 }
