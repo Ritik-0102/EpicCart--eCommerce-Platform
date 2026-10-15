@@ -106,10 +106,9 @@ const Navbar = () => {
           {/* Region 2 (Center): Flexible Search Bar */}
           <form className="navbar-search-form hidden-mobile" onSubmit={handleSearch} role="search">
             <div className="search-input-wrapper">
-              <Search size={17} className="search-icon" aria-hidden="true" />
               <input 
-                type="search" 
-                placeholder="Search across 700+ premium products, brands &amp; categories..." 
+                type="text" 
+                placeholder="Search across premium products, brands &amp; categories..." 
                 value={searchQuery} 
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search products"
