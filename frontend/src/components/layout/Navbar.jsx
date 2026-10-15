@@ -8,9 +8,6 @@ import {
   Package, 
   Menu, 
   X, 
-  Sparkles, 
-  ArrowRight,
-  ShieldCheck,
   ChevronRight
 } from 'lucide-react';
 import { AuthContext } from '../../context/AuthContext';
@@ -73,7 +70,7 @@ const Navbar = () => {
 
   return (
     <header className={`navbar-header ${isScrolled ? 'is-scrolled' : ''}`}>
-      {/* 1. Announcement Strip */}
+      {/* 1. Centered Free Delivery Announcement Strip */}
       <div className="announcement-bar">
         <div className="container announcement-inner">
           <div className="announcement-message">
@@ -82,17 +79,10 @@ const Navbar = () => {
               Free express delivery on all orders over <strong>₹499</strong> nationwide.
             </span>
           </div>
-          <div className="announcement-links hidden-mobile">
-            <Link to="/products?category=electronics" className="announcement-promo">
-              <Sparkles size={13} className="promo-sparkle" />
-              <span>New Flagship Tech Just Landed</span>
-              <ArrowRight size={12} />
-            </Link>
-          </div>
         </div>
       </div>
 
-      {/* 2. Main Navbar */}
+      {/* 2. Main Navbar (Three-Region Layout: Left Logo, Center Search, Right Actions) */}
       <div className="navbar-main">
         <div className="container navbar-main-container">
           {/* Mobile Menu Toggle Button */}
@@ -102,25 +92,24 @@ const Navbar = () => {
             aria-label="Toggle navigation menu"
             aria-expanded={isMobileMenuOpen}
           >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
 
-          {/* Brand Logo / Wordmark */}
+          {/* Region 1 (Left): Brand Logo without Marketplace badge */}
           <div className="navbar-logo">
-            <Link to="/" aria-label="EpicCart - Premium Marketplace">
+            <Link to="/" aria-label="EpicCart Home">
               <span className="logo-text">EpicCart</span>
               <span className="logo-dot">.</span>
             </Link>
-            <span className="logo-badge hidden-mobile">Marketplace</span>
           </div>
 
-          {/* Prominent Search Bar (Desktop) */}
+          {/* Region 2 (Center): Flexible Search Bar */}
           <form className="navbar-search-form hidden-mobile" onSubmit={handleSearch} role="search">
             <div className="search-input-wrapper">
-              <Search size={18} className="search-icon" aria-hidden="true" />
+              <Search size={17} className="search-icon" aria-hidden="true" />
               <input 
                 type="search" 
-                placeholder="Search across 700+ premium products, brands & categories..." 
+                placeholder="Search across 700+ premium products, brands &amp; categories..." 
                 value={searchQuery} 
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search products"
@@ -142,7 +131,7 @@ const Navbar = () => {
             </button>
           </form>
 
-          {/* Right Action Shortcuts */}
+          {/* Region 3 (Right): Account, My Orders, Wishlist, Cart */}
           <div className="navbar-actions">
             {/* Account / Login Shortcut */}
             <Link 
@@ -151,9 +140,9 @@ const Navbar = () => {
               aria-label={user ? `Account: ${user.name}` : 'Sign in to account'}
             >
               <div className="action-icon-wrapper">
-                <User size={20} />
+                <User size={19} />
               </div>
-              <div className="action-text-group hidden-mobile">
+              <div className="action-text-group hidden-tablet">
                 <span className="action-subtext">Hello, {user ? user.name?.split(' ')[0] : 'Sign In'}</span>
                 <span className="action-title">Account</span>
               </div>
@@ -167,10 +156,10 @@ const Navbar = () => {
               title="Track and manage your orders"
             >
               <div className="action-icon-wrapper">
-                <Package size={20} />
+                <Package size={19} />
               </div>
-              <div className="action-text-group hidden-mobile">
-                <span className="action-subtext">Returns &</span>
+              <div className="action-text-group hidden-tablet">
+                <span className="action-subtext">Returns &amp;</span>
                 <span className="action-title">Orders</span>
               </div>
             </Link>
@@ -182,13 +171,13 @@ const Navbar = () => {
               aria-label={`Wishlist with ${wishlistItemCount} items`}
             >
               <div className="action-icon-wrapper">
-                <Heart size={20} />
+                <Heart size={19} />
                 {wishlistItemCount > 0 && (
                   <span className="badge-pill wishlist-badge">{wishlistItemCount}</span>
                 )}
               </div>
-              <div className="action-text-group hidden-mobile">
-                <span className="action-subtext">Favorites</span>
+              <div className="action-text-group hidden-tablet">
+                <span className="action-subtext">Saved</span>
                 <span className="action-title">Wishlist</span>
               </div>
             </Link>
@@ -200,52 +189,58 @@ const Navbar = () => {
               aria-label={`Shopping cart with ${cartItemCount} items`}
             >
               <div className="action-icon-wrapper">
-                <ShoppingCart size={20} />
+                <ShoppingCart size={19} />
                 {cartItemCount > 0 && (
                   <span className="badge-pill cart-badge">{cartItemCount}</span>
                 )}
               </div>
-              <div className="action-text-group hidden-mobile">
-                <span className="action-subtext">Shopping</span>
-                <span className="action-title">Cart</span>
+              <div className="action-text-group hidden-tablet">
+                <span className="action-subtext">Cart</span>
+                <span className="action-title">{cartItemCount > 0 ? `(${cartItemCount})` : 'Empty'}</span>
               </div>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* 3. Category Navigation Row (Desktop) */}
+      {/* 3. Balanced Category Navigation Row */}
       <nav className="navbar-category-strip hidden-mobile" aria-label="Product categories">
         <div className="container category-strip-container">
-          <Link 
-            to="/products" 
-            className={`category-nav-link ${location.pathname === '/products' && !activeCategoryParam ? 'active' : ''}`}
-          >
-            <span className="all-icon">☰</span>
-            <span>All Products</span>
-          </Link>
+          <div className="category-links-group">
+            <Link 
+              to="/products" 
+              className={`category-nav-link ${location.pathname === '/products' && !activeCategoryParam ? 'active' : ''}`}
+            >
+              <span className="all-icon">☰</span>
+              <span>All Products</span>
+            </Link>
 
-          <div className="category-nav-divider"></div>
+            <span className="category-nav-divider" aria-hidden="true"></span>
 
-          {CATEGORY_LINKS.map(cat => {
-            const isActive = location.pathname === '/products' && activeCategoryParam === cat.value.toLowerCase();
-            return (
-              <Link 
-                key={cat.value} 
-                to={`/products?category=${encodeURIComponent(cat.value)}`}
-                className={`category-nav-link ${isActive ? 'active' : ''}`}
-              >
-                {cat.label}
-              </Link>
-            );
-          })}
+            {CATEGORY_LINKS.map(cat => {
+              const isActive = location.pathname === '/products' && activeCategoryParam === cat.value.toLowerCase();
+              return (
+                <Link 
+                  key={cat.value} 
+                  to={`/products?category=${encodeURIComponent(cat.value)}`}
+                  className={`category-nav-link ${isActive ? 'active' : ''}`}
+                >
+                  {cat.label}
+                </Link>
+              );
+            })}
 
-          <div className="category-strip-spacer"></div>
+            <span className="category-nav-divider" aria-hidden="true"></span>
 
-          <Link to="/products?sort=newest" className="category-promo-pill">
-            <span className="promo-sparkle">★</span>
-            <span>Trending Deals</span>
-          </Link>
+            <Link 
+              to="/products?sort=newest" 
+              className="category-promo-pill"
+              aria-label="View trending deals"
+            >
+              <span className="promo-sparkle">★</span>
+              <span>Trending Deals</span>
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -282,7 +277,7 @@ const Navbar = () => {
           </div>
 
           <div className="mobile-drawer-content">
-            <div className="mobile-group-title">Quick Shortcuts</div>
+            <div className="mobile-group-title">Quick Navigation</div>
             <div className="mobile-shortcuts-grid">
               <Link 
                 to={user ? "/account" : "/login"} 

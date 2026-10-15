@@ -116,15 +116,17 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
 
       {/* Product Information */}
       <div className="product-body">
-        {/* Category & Star Rating */}
+        {/* Category & Optional Verified Rating */}
         <div className="product-meta-row">
           <span className="product-category-tag">
             {product.category?.name || 'Curated'}
           </span>
-          <div className="product-rating">
-            <Star size={12} className="star-filled" fill="#F59E0B" color="#F59E0B" />
-            <span>4.8</span>
-          </div>
+          {(product.rating || product.avgRating) ? (
+            <div className="product-rating">
+              <Star size={12} className="star-filled" fill="#F59E0B" color="#F59E0B" />
+              <span>{product.rating || product.avgRating}</span>
+            </div>
+          ) : null}
         </div>
 
         {/* Product Title */}

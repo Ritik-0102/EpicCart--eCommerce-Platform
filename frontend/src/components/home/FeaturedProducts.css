@@ -108,16 +108,33 @@
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
 }
 
+@media (max-width: 640px) {
+  .spotlight-tabs {
+    width: 100%;
+    border-radius: var(--radius-lg);
+  }
+
+  .tab-pill-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.75rem;
+    text-align: center;
+    white-space: normal;
+  }
+}
+
 /* Responsive Product Grids */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: var(--space-5);
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
 }
 
-@media (min-width: 480px) {
+@media (min-width: 640px) {
   .products-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
   }
 }
 
@@ -129,6 +146,15 @@
 }
 
 @media (min-width: 1024px) {
+  .products-grid,
+  .bestsellers-grid,
+  .secondary-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+@media (min-width: 1280px) {
   .bestsellers-grid {
     grid-template-columns: repeat(5, 1fr);
   }

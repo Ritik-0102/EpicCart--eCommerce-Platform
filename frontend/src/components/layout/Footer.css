@@ -172,6 +172,7 @@
 .footer-input-wrapper {
   position: relative;
   flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
 }
@@ -210,12 +211,25 @@
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
+  flex-shrink: 0;
   transition: background-color var(--transition-fast);
 }
 
 .newsletter-btn:hover {
   background-color: var(--color-accent-hover);
+}
+
+@media (max-width: 380px) {
+  .footer-newsletter-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .newsletter-btn {
+    width: 100%;
+  }
 }
 
 .newsletter-success-box {
@@ -274,4 +288,23 @@
 
 .dot-divider {
   color: #475569;
+}
+
+@media (max-width: 640px) {
+  .footer-top-container {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-3);
+  }
+
+  .bottom-inner {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-3);
+  }
+
+  .legal-links {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }

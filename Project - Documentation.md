@@ -564,4 +564,39 @@ All 10 edge cases of administrative routing were successfully verified:
   - `npm run lint`: 0 errors across 41 files.
   - Zero backend, database, payment, or auth contracts were modified.
 
+### Day 24: UI Refinement, Layout Repair & Responsive Polish
+- **Branding & Header Refinements (`Navbar.jsx`, `Navbar.css`):**
+  - Removed the `Marketplace` pill badge beside the `EpicCart.` wordmark and rebalanced brand spacing.
+  - Rebuilt navbar into a robust 3-region layout (Left: Logo, Center: Flexible search, Right: Actions with text labels hidden on tablet to prevent wrapping).
+  - Added `padding-left: 42px` to the search input, ensuring the search icon never collides with placeholder text.
+  - Centered the free delivery announcement banner (`[FREE DELIVERY] Free express delivery on all orders over ₹499 nationwide.`) across the full viewport and removed the right-hand promotional link.
+  - Rebalanced the category strip, centering all 7 categories + All Products + Trending Deals without artificial spacers.
+- **Product Card & Grid Polish (`ProductCard.jsx`, `ProductCard.css`, `FeaturedProducts.css`):**
+  - Removed the static hardcoded `4.8` star rating; rating is now conditionally rendered only when verified rating data (`product.rating` or `product.avgRating`) exists.
+  - Standardized product title typography to `font-size: 0.875rem` (14px), `font-weight: 600`, `line-height: 1.4`, 2-line clamp (`min-height: 2.8em`, `max-height: 2.8em`), and `word-break: break-word` to guarantee uniform card heights and prevent letter clipping.
+  - Pinned the `Add to Cart` button and price footer to the bottom of the card (`margin-top: auto`).
+  - Fixed responsive grid column counts in `FeaturedProducts.css`: 2 columns on mobile ($\le 639$px) with `0.75rem` gap, 3 columns at 768px, 4 columns at 1024px (eliminating card squeezing), and 5 columns only at $\ge 1280$px for Bestsellers.
+- **Category Grid Symmetry (`Categories.css`):**
+  - Replaced the rigid 4-column grid with a centered flexbox layout (`display: flex; flex-wrap: wrap; justify-content: center;`).
+  - On desktop ($\ge 1024$px), row 1 features 4 cards and row 2 features the remaining 3 cards centered symmetrically, eliminating the empty slot.
+  - Scaled mobile category cards to a compact 2-column centered layout with responsive padding and typography.
+- **Hero Clean-up & Content Accuracy (`Hero.jsx`, `Hero.css`):**
+  - Removed negative coordinate offsets (`top: -15px`, `bottom: -15px`, etc.) to prevent badges from clipping outside section boundaries.
+  - Replaced unsupported marketing claims (`12,500+ Orders Fulfilled Nationwide` and fake stars) with verified data (`Curated Catalog • Over 700 Products`).
+  - Replaced trust pill rating with `7 Curated Departments`.
+  - Added full mobile responsive styling with stacked CTAs on narrow viewports ($\le 480$px).
+- **Offer Cards Harmonization (`Promotions.css`):**
+  - Unified image heights to `190px` across all cards.
+  - Pinned CTA buttons to the bottom of the content area (`margin-top: auto`), ensuring consistent card heights and button alignment.
+  - Made the large feature card span 2 columns on tablet (768px - 1023px) for a balanced layout.
+- **Footer Responsiveness & Verified Copy (`Footer.jsx`, `Footer.css`):**
+  - Replaced `Over 12,000 Orders Delivered Nationwide` with `Curated Catalog with 700+ Verified Products`.
+  - Added `min-width: 0` to `.footer-input-wrapper` and vertical stacking for narrow viewports ($\le 380$px) to prevent newsletter form overflow.
+  - Centered legal links and top strip items on mobile screens.
+- **Verification:**
+  - `npm run build`: Production build cleanly passed with 0 errors in 617ms.
+  - `npm run lint`: 0 errors.
+  - Multi-viewport verification confirmed across 360px, 390px, 768px, 1024px, 1280px, and 1440px.
+
+
 

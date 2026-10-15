@@ -51,7 +51,7 @@ const Footer = () => {
           </div>
           <div className="footer-feature">
             <Package size={20} className="feature-icon" />
-            <span>Over 12,000 Orders Delivered Nationwide</span>
+            <span>Curated Catalog with 700+ Verified Products</span>
           </div>
         </div>
       </div>

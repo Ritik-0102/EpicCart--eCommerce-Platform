@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, ShieldCheck, Truck, Star } from 'lucide-react';
+import { ArrowRight, Sparkles, ShieldCheck, Truck, Package } from 'lucide-react';
 import './Hero.css';
 
 const Hero = () => {
@@ -45,8 +45,8 @@ const Hero = () => {
               <span>Express Delivery</span>
             </div>
             <div className="trust-pill">
-              <Star size={16} className="trust-icon star-icon" />
-              <span>4.9 / 5 Rating</span>
+              <Package size={16} className="trust-icon" />
+              <span>7 Curated Departments</span>
             </div>
           </div>
         </div>
@@ -76,9 +76,12 @@ const Hero = () => {
 
           {/* Floating Merchandising Card 2 (Bottom Right) */}
           <div className="hero-floating-badge badge-bottom-right">
-            <div className="badge-stars">★★★★★</div>
-            <div className="badge-review-text">
-              <strong>12,500+ Orders</strong> Fulfilled Nationwide
+            <div className="badge-icon-box badge-icon-catalog">
+              <Package size={16} />
+            </div>
+            <div className="badge-info">
+              <span className="badge-tag">Curated Catalog</span>
+              <span className="badge-value">Over 700 Products</span>
             </div>
           </div>
         </div>
