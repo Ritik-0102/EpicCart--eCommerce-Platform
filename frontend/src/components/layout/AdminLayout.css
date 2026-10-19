@@ -1,0 +1,191 @@
+/* ==========================================================================
+   EpicCart - Admin Layout Responsive Styles
+   ========================================================================== */
+
+.admin-layout-root {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f8fafc;
+  position: relative;
+  width: 100%;
+}
+
+/* Mobile Admin Top Navigation Bar (Sticky) */
+.admin-mobile-header {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: #1e293b;
+  color: #ffffff;
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  width: 100%;
+}
+
+.admin-mobile-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-menu-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #334155;
+  color: #ffffff;
+  border: 1px solid #475569;
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 38px;
+}
+
+.admin-menu-toggle:active {
+  background-color: #475569;
+}
+
+/* Desktop Sidebar */
+.admin-sidebar {
+  width: 250px;
+  flex-shrink: 0;
+  background-color: #1e293b;
+  color: #ffffff;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-normal);
+}
+
+.admin-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #334155;
+}
+
+.admin-sidebar-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.admin-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  color: #cbd5e1;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  min-height: 42px;
+}
+
+.admin-nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.admin-nav-link.active {
+  background-color: #2563eb;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(37, 99, 235, 0.25);
+}
+
+.admin-store-link {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid #334155;
+}
+
+.admin-store-link a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.admin-store-link a:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Main Content Area */
+.admin-main-content {
+  flex: 1;
+  min-width: 0; /* Critical: allows flex child to shrink properly */
+  padding: 24px;
+  background-color: #f8fafc;
+  overflow-y: auto;
+  max-width: 100%;
+}
+
+/* Mobile Drawer Overlay and Responsiveness */
+@media (max-width: 900px) {
+  .admin-layout-root {
+    flex-direction: column;
+  }
+
+  .admin-mobile-header {
+    display: flex;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    z-index: 55;
+    box-shadow: var(--shadow-xl);
+    transform: translateX(-100%);
+    overflow-y: auto;
+  }
+
+  .admin-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .admin-backdrop {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 50;
+  }
+
+  .admin-main-content {
+    padding: 16px 12px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-main-content {
+    padding: 12px 8px;
+  }
+}
+

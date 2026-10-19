@@ -116,3 +116,32 @@
   font-size: 1.1rem;
   margin-top: 20px;
 }
+
+@media (max-width: 480px) {
+  .checkout-container {
+    padding: 24px 12px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .coupon-form {
+    flex-direction: column;
+  }
+
+  .coupon-form button {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .checkout-summary-section {
+    padding: 16px 12px;
+  }
+
+  .place-order-btn {
+    padding: 12px;
+    font-size: 1rem;
+  }
+}

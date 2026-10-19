@@ -127,6 +127,13 @@ img {
   padding-right: var(--space-4);
 }
 
+@media (max-width: 360px) {
+  .container {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+  }
+}
+
 @media (min-width: 640px) {
   .container {
     padding-left: var(--space-6);
@@ -157,6 +164,15 @@ img {
   text-align: center;
   white-space: nowrap;
   user-select: none;
+  max-width: 100%;
+}
+
+@media (max-width: 360px) {
+  .btn {
+    white-space: normal;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+  }
 }
 
 .btn:active {
@@ -240,6 +256,8 @@ input, select, textarea {
   background-color: var(--color-bg-card);
   color: var(--color-text-main);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 input:focus, select:focus, textarea:focus {
@@ -280,4 +298,66 @@ input:focus, select:focus, textarea:focus {
 
 .status-message.error {
   color: var(--color-danger);
+}
+
+/* ==========================================================================
+   Global Responsive Product Grid System
+   ========================================================================== */
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (max-width: 340px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+}
+
+@media (min-width: 640px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+@media (min-width: 768px) {
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .products-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+/* ==========================================================================
+   Responsive Data Tables & Utility Helpers
+   ========================================================================== */
+.overflow-x-auto {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 1rem;
+}
+
+table {
+  max-width: 100%;
+}
+
+.w-full {
+  width: 100%;
 }

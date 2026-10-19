@@ -202,8 +202,39 @@ const Navbar = () => {
         </div>
       </div>
 
+      {/* 2b. In-Flow Mobile Search Bar (Directly accessible on mobile devices) */}
+      <div className="navbar-mobile-search-strip">
+        <div className="container">
+          <form className="mobile-search-form" onSubmit={handleSearch} role="search">
+            <div className="search-input-wrapper">
+              <input 
+                type="text" 
+                placeholder="Search products, brands, categories..." 
+                value={searchQuery} 
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label="Search products"
+                className="search-input"
+              />
+              {searchQuery && (
+                <button 
+                  type="button" 
+                  className="search-clear-btn"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+            <button type="submit" className="search-submit-btn">
+              Search
+            </button>
+          </form>
+        </div>
+      </div>
+
       {/* 3. Balanced Category Navigation Row */}
-      <nav className="navbar-category-strip hidden-mobile" aria-label="Product categories">
+      <nav className="navbar-category-strip" aria-label="Product categories">
         <div className="container category-strip-container">
           <div className="category-links-group">
             <Link 

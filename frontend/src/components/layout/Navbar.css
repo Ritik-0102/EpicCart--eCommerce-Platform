@@ -505,6 +505,46 @@
   color: var(--color-accent);
 }
 
+/* Mobile In-Flow Search Strip */
+.navbar-mobile-search-strip {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .navbar-mobile-search-strip {
+    display: block;
+    background-color: #FFFFFF;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .mobile-search-form {
+    display: flex;
+    width: 100%;
+    margin: 0;
+  }
+
+  .mobile-search-form .search-input {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    height: 40px;
+    font-size: 0.875rem;
+    background-color: var(--color-bg-subtle);
+  }
+
+  .mobile-search-form .search-submit-btn {
+    height: 40px;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    background-color: var(--color-accent);
+    color: #FFFFFF;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+}
+
 /* Responsive Breakpoints */
 @media (max-width: 1100px) {
   .hidden-tablet {
@@ -512,7 +552,7 @@
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .hidden-mobile {
     display: none !important;
   }
@@ -522,22 +562,98 @@
   }
 
   .navbar-main-container {
-    height: 60px;
+    height: 56px;
+    gap: 8px;
+  }
+
+  .navbar-logo {
+    min-width: auto;
+  }
+
+  .logo-text {
+    font-size: 1.35rem;
+  }
+
+  .logo-dot {
+    font-size: 1.5rem;
+  }
+
+  .navbar-actions {
+    gap: 2px;
   }
 
   .action-item {
-    padding: 0.4rem;
+    padding: 6px;
+    min-width: 38px;
+    min-height: 38px;
+    justify-content: center;
+  }
+
+  .navbar-category-strip {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    background-color: #FFFFFF;
+  }
+
+  .navbar-category-strip::-webkit-scrollbar {
+    display: none;
   }
 
   .category-strip-container {
     justify-content: flex-start;
     overflow-x: auto;
     scrollbar-width: none;
+    padding-top: 6px;
+    padding-bottom: 6px;
   }
 
   .category-links-group {
     justify-content: flex-start;
     flex-wrap: nowrap;
     width: max-content;
+    gap: 6px;
+  }
+
+  .category-nav-link {
+    padding: 4px 8px;
+    font-size: 0.8125rem;
+  }
+
+  .category-promo-pill {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .navbar-main-container {
+    padding-left: 6px;
+    padding-right: 6px;
+    gap: 4px;
+  }
+
+  .logo-text {
+    font-size: 1.2rem;
+  }
+
+  .logo-dot {
+    font-size: 1.35rem;
+  }
+
+  .action-item {
+    padding: 4px;
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .action-icon-wrapper svg {
+    width: 17px;
+    height: 17px;
+  }
+
+  .mobile-toggle-btn {
+    width: 32px;
+    height: 32px;
   }
 }

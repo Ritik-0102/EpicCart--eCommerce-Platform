@@ -136,3 +136,17 @@
   color: var(--color-text-main);
 }
 
+@media (max-width: 480px) {
+  .auth-page {
+    padding: var(--space-4) var(--space-2);
+  }
+
+  .auth-box {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .auth-title {
+    font-size: 1.5rem;
+  }
+}
+

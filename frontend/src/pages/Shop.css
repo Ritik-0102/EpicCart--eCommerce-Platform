@@ -191,6 +191,31 @@
   line-height: 1.5;
 }
 
+@media (max-width: 640px) {
+  .category-hero-banner {
+    padding: 1.25rem 1rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .banner-content {
+    gap: 0.875rem;
+  }
+
+  .banner-icon {
+    font-size: 2rem;
+    padding: 0.5rem;
+    border-radius: 0.75rem;
+  }
+
+  .banner-title {
+    font-size: 1.35rem;
+  }
+
+  .banner-tagline {
+    font-size: 0.8125rem;
+  }
+}
+
 .shop-header {
   text-align: center;
   margin-bottom: 2rem;
@@ -224,6 +249,34 @@
   gap: 1rem;
   padding-top: 0.75rem;
   border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 600px) {
+  .discovery-controls {
+    padding: 0.75rem;
+  }
+
+  .controls-row-top {
+    gap: 0.5rem;
+  }
+
+  .controls-row-bottom {
+    gap: 0.5rem;
+  }
+
+  .filter-group {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 130px;
+  }
+
+  .filter-select-sm, .sort-select {
+    width: 100%;
+  }
+
+  .checkbox-label {
+    width: 100%;
+    margin-top: 0.25rem;
+  }
 }
 
 .filter-group {
@@ -360,5 +413,22 @@
 .current-page-num {
   font-weight: 700;
   color: var(--color-text-main);
+}
+
+@media (max-width: 480px) {
+  .pagination-bar {
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1rem;
+  }
+
+  .pagination-btn {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.8125rem;
+  }
+
+  .pagination-info {
+    font-size: 0.8125rem;
+  }
 }
 

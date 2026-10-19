@@ -63,3 +63,14 @@
   width: 100%;
   padding: 10px;
 }
+
+@media (max-width: 480px) {
+  .wishlist-container {
+    padding: 24px 12px;
+  }
+
+  .wishlist-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}

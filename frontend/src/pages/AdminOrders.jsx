@@ -79,7 +79,7 @@ const AdminOrders = () => {
               <tr key={order.id} className="border-b hover:bg-gray-50">
                 <td className="p-4">{order.id}</td>
                 <td className="p-4">{order.userId}</td>
-                <td className="p-4">${parseFloat(order.totalAmount).toFixed(2)}</td>
+                <td className="p-4">₹{parseFloat(order.totalAmount).toFixed(2)}</td>
                 <td className="p-4">
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                     order.paymentStatus === 'PAID' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'

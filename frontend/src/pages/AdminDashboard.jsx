@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { fetchAdminSummary } from '../services/api';
 
@@ -52,7 +52,7 @@ const AdminDashboard = () => {
         <div style={{ background: '#fff', padding: '20px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <h2 style={{ fontSize: '1rem', color: '#666', marginBottom: '10px' }}>Total Revenue</h2>
           <p style={{ fontSize: '2rem', fontWeight: 'bold' }}>
-            ${(summary?.totalRevenue || 0).toFixed(2)}
+            ₹{(summary?.totalRevenue || 0).toFixed(2)}
           </p>
         </div>
       </div>
@@ -62,13 +62,13 @@ const AdminDashboard = () => {
           <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '15px' }}>Quick Links</h2>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             <li style={{ marginBottom: '10px' }}>
-              <a href="/admin/products" style={{ color: '#2563eb', textDecoration: 'none' }}>Manage Products & Inventory</a>
+              <Link to="/admin/products" style={{ color: '#2563eb', textDecoration: 'none' }}>Manage Products & Inventory</Link>
             </li>
             <li style={{ marginBottom: '10px' }}>
-              <a href="/admin/orders" style={{ color: '#2563eb', textDecoration: 'none' }}>Manage Orders</a>
+              <Link to="/admin/orders" style={{ color: '#2563eb', textDecoration: 'none' }}>Manage Orders</Link>
             </li>
             <li style={{ marginBottom: '10px' }}>
-              <a href="/admin/customers" style={{ color: '#2563eb', textDecoration: 'none' }}>Manage Customers</a>
+              <Link to="/admin/customers" style={{ color: '#2563eb', textDecoration: 'none' }}>Manage Customers</Link>
             </li>
           </ul>
         </div>

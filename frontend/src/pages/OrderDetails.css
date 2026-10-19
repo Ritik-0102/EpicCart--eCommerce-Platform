@@ -150,3 +150,29 @@
   color: #721c24;
   border: 1px solid #f5c6cb;
 }
+
+@media (max-width: 480px) {
+  .order-details-container {
+    padding: 24px 12px;
+  }
+
+  .order-header-section {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .order-item-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .item-price {
+    align-self: flex-end;
+  }
+
+  .order-summary-box, .shipping-box {
+    padding: 16px 12px;
+  }
+}

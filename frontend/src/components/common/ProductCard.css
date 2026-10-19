@@ -271,3 +271,16 @@
   }
 }
 
+@media (max-width: 360px) {
+  .product-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .product-cart-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

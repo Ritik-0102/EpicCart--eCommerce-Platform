@@ -115,7 +115,7 @@ const OrderDetails = () => {
 
   return (
     <div className="order-details-container container">
-      <Link to="/orders" className="breadcrumb">? Back to Orders</Link>
+      <Link to="/orders" className="breadcrumb">← Back to Orders</Link>
       
       <div className="order-header-section">
         <h2>Order #{order.id}</h2>
@@ -151,7 +151,7 @@ const OrderDetails = () => {
                 <p className="item-meta">Qty: {item.quantity}</p>
               </div>
               <div className="item-price">
-                ${(item.price * item.quantity).toFixed(2)}
+                ₹{(item.price * item.quantity).toFixed(2)}
               </div>
             </div>
           ))}
