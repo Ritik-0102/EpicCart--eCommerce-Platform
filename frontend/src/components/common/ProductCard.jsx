@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag, Star } from 'lucide-react';
 import { CartContext } from '../../context/CartContext';
@@ -14,6 +14,9 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
   const { addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemId } = useContext(WishlistContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const [localAdding, setLocalAdding] = useState(false);
+  const isAdding = addingToCart || localAdding;
 
   const inWishlist = isInWishlist(product.id);
   const isOutOfStock = product.stock === 0;
@@ -37,7 +40,9 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
     if (onAddToCart) {
       onAddToCart(product);
     } else {
+      setLocalAdding(true);
       const success = await addToCart(product.id, 1);
+      setLocalAdding(false);
       if (success) {
         toast.success(`Added "${product.name}" to cart!`);
       } else {
@@ -77,10 +82,21 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
     maximumFractionDigits: 2
   });
 
+  const hasDiscount = Boolean(product.originalPrice && product.originalPrice > product.price);
+  const discountPercent = hasDiscount
+    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+    : 0;
+  const formattedOriginalPrice = hasDiscount
+    ? parseFloat(product.originalPrice).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      })
+    : null;
+
   return (
     <Link 
       to={`/products/${product.id}`} 
-      className="product-card"
+      className={`product-card ${isOutOfStock ? 'card-out-of-stock' : ''}`}
       aria-label={`View details for ${product.name}`}
     >
       {/* Product Image & Badges */}
@@ -97,7 +113,7 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
         {isOutOfStock ? (
           <span className="stock-badge badge-out-of-stock">Out of Stock</span>
         ) : isLowStock ? (
-          <span className="stock-badge badge-low-stock">Only {product.stock} left!</span>
+          <span className="stock-badge badge-low-stock">Only {product.stock} left</span>
         ) : (
           <span className="stock-badge badge-in-stock">In Stock</span>
         )}
@@ -137,23 +153,33 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
         {/* Price & Action Row */}
         <div className="product-footer">
           <div className="price-stack">
-            <span className="price-currency">₹</span>
-            <span className="price-amount">{formattedPrice}</span>
+            <div className="price-current-line">
+              <span className="price-currency">₹</span>
+              <span className="price-amount">{formattedPrice}</span>
+            </div>
+            {hasDiscount && (
+              <div className="price-discount-line">
+                <span className="price-original">₹{formattedOriginalPrice}</span>
+                <span className="price-discount-badge">{discountPercent}% off</span>
+              </div>
+            )}
           </div>
 
           <button 
             type="button"
-            className="product-cart-btn"
+            className={`product-cart-btn ${isOutOfStock ? 'btn-out-of-stock' : ''}`}
             onClick={handleAddToCartClick}
-            disabled={addingToCart || isOutOfStock}
-            aria-label={`Add ${product.name} to cart`}
+            disabled={isAdding || isOutOfStock}
+            aria-label={isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
           >
-            {addingToCart ? (
-              <span className="btn-spinner"></span>
+            {isAdding ? (
+              <span className="btn-spinner" aria-label="Adding to cart..."></span>
+            ) : isOutOfStock ? (
+              <span className="btn-text">Sold Out</span>
             ) : (
               <>
                 <ShoppingBag size={14} />
-                <span>Add</span>
+                <span className="btn-text">Add to Cart</span>
               </>
             )}
           </button>

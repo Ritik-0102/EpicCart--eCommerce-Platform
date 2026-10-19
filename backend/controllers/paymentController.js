@@ -71,7 +71,8 @@ const initiatePayment = async (req, res, next) => {
         id: razorpayOrder.id,
         amount: razorpayOrder.amount,
         currency: razorpayOrder.currency,
-        orderId: order.id
+        orderId: order.id,
+        key: process.env.RAZORPAY_KEY_ID || ''
       }
     });
 
@@ -114,15 +115,85 @@ const verifyPayment = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid payment signature' });
     }
 
-    // 3. Signature is valid, update order status to PAID
-    await prisma.order.update({
-      where: { id: parseInt(orderId) },
-      data: {
-        status: 'PAID',
-        razorpayPaymentId: razorpay_payment_id,
-        razorpaySignature: razorpay_signature
+    // 3. Signature is valid, update order status to PAID in a safe transaction
+    // Product stock is decremented and cart cleared ONLY once payment is cryptographically verified
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+      const existingOrder = await tx.order.findUnique({
+        where: { id: parseInt(orderId) },
+        include: {
+          items: true,
+          user: true
+        }
+      });
+
+      if (!existingOrder) {
+        throw new Error('Order not found');
       }
+
+      // Idempotency: if already paid, do not re-decrement stock or re-clear cart
+      if (existingOrder.status === 'PAID') {
+        return existingOrder;
+      }
+
+      // Update order status and payment IDs
+      const orderRecord = await tx.order.update({
+        where: { id: existingOrder.id },
+        data: {
+          status: 'PAID',
+          razorpayPaymentId: razorpay_payment_id,
+          razorpaySignature: razorpay_signature
+        },
+        include: {
+          items: true,
+          user: true
+        }
+      });
+
+      // Decrement product stock
+      for (const item of existingOrder.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { decrement: item.quantity } }
+        });
+      }
+
+      // Clear the user's cart
+      const userCart = await tx.cart.findUnique({
+        where: { userId: existingOrder.userId }
+      });
+      if (userCart) {
+        await tx.cartItem.deleteMany({
+          where: { cartId: userCart.id }
+        });
+      }
+
+      // Increment coupon usage if a coupon was used
+      if (existingOrder.couponId) {
+        await tx.coupon.update({
+          where: { id: existingOrder.couponId },
+          data: { usedCount: { increment: 1 } }
+        });
+      }
+
+      return orderRecord;
     });
+
+    // Send email notification upon verified payment (Fail-safe)
+    try {
+      const sendEmail = require('../utils/sendEmail');
+      const formattedTotal = Number(updatedOrder.total).toLocaleString('en-IN', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+      await sendEmail({
+        email: updatedOrder.user.email,
+        subject: `Order Confirmation - #${updatedOrder.id}`,
+        message: `Thank you for your order, ${updatedOrder.user.name}!\n\nYour payment was successful and Order #${updatedOrder.id} is confirmed.\nTotal amount paid: ₹${formattedTotal}\nPayment ID: ${razorpay_payment_id}\n\nWe will notify you once it ships.`,
+        html: `<h2>Thank you for your order, ${updatedOrder.user.name}!</h2><p>Your payment was successful and Order <strong>#${updatedOrder.id}</strong> is confirmed.</p><p>Total amount paid: <strong>₹${formattedTotal}</strong></p><p>Razorpay Payment ID: <code>${razorpay_payment_id}</code></p><p>We will notify you once it ships.</p>`
+      });
+    } catch (emailError) {
+      console.error('Confirmation email could not be sent:', emailError);
+    }
 
     res.status(200).json({
       success: true,

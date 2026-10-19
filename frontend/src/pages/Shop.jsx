@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { fetchProducts, fetchCategories } from '../services/api';
-import { CartContext } from '../context/CartContext';
-import { WishlistContext } from '../context/WishlistContext';
-import { AuthContext } from '../context/AuthContext';
-import toast from 'react-hot-toast';
+import ProductCard from '../components/common/ProductCard';
 import './Shop.css';
 
 const CATEGORY_METADATA = {
@@ -61,13 +58,6 @@ const Shop = () => {
   const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [addingToCart, setAddingToCart] = useState({}); // per-product loading state
-
-  const { addToCart } = useContext(CartContext);
-  const { addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemId } = useContext(WishlistContext);
-  const { user } = useContext(AuthContext);
-  const navigate = useNavigate();
-
   // Local state for UI filters
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || '');
@@ -125,56 +115,6 @@ const Shop = () => {
     setSelectedCategory(searchParams.get('category') || '');
     setCurrentPage(1);
   }, [searchParams]);
-
-  // Add to cart handler (stops link click propagation)
-  const handleAddToCart = async (e, product) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!user) {
-      toast.error('Please log in to add items to the cart.');
-      navigate('/login');
-      return;
-    }
-
-    setAddingToCart(prev => ({ ...prev, [product.id]: true }));
-    const success = await addToCart(product.id, 1);
-    setAddingToCart(prev => ({ ...prev, [product.id]: false }));
-
-    if (success) {
-      toast.success(`"${product.name}" added to cart!`);
-    } else {
-      toast.error('Failed to add to cart. Please try again.');
-    }
-  };
-
-  // Wishlist toggle handler (stops link click propagation)
-  const handleWishlistToggle = async (e, product) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (!user) {
-      toast.error('Please log in to manage your wishlist.');
-      navigate('/login');
-      return;
-    }
-
-    const inWishlist = isInWishlist(product.id);
-    if (inWishlist) {
-      const itemId = getWishlistItemId(product.id);
-      if (itemId) {
-        await removeFromWishlist(itemId);
-        toast.success(`"${product.name}" removed from wishlist.`);
-      }
-    } else {
-      const success = await addToWishlist(product.id);
-      if (success) {
-        toast.success(`"${product.name}" added to wishlist!`);
-      } else {
-        toast.error('Failed to update wishlist. Please try again.');
-      }
-    }
-  };
 
   // --- Filtering and sorting (derived state) ---
   let displayedProducts = [...allProducts];
@@ -391,59 +331,9 @@ const Shop = () => {
       {!isLoading && !error && paginatedProducts.length > 0 && (
         <>
           <div className="products-grid">
-            {paginatedProducts.map((product) => {
-              const isOutOfStock = product.stock === 0;
-              const isLowStock = product.stock > 0 && product.stock <= (product.lowStockThreshold || 5);
-
-              return (
-                <div key={product.id} className="product-card-wrapper">
-                  <Link to={`/products/${product.id}`} className="product-card shop-product-card">
-                    <div className="product-image-container">
-                      <img 
-                        src={product.imageUrl || 'https://via.placeholder.com/500?text=No+Image'} 
-                        alt={product.name} 
-                        className="product-image"
-                        loading="lazy"
-                        onError={(e) => { e.target.src = 'https://via.placeholder.com/500?text=No+Image'; }}
-                      />
-
-                      {/* Stock badges */}
-                      {isOutOfStock && <span className="stock-badge out-of-stock">Out of Stock</span>}
-                      {isLowStock && <span className="stock-badge low-stock">Only {product.stock} left</span>}
-
-                      {/* Wishlist heart button — does NOT navigate */}
-                      <button
-                        className={`wishlist-btn${isInWishlist(product.id) ? ' in-wishlist' : ''}`}
-                        onClick={(e) => handleWishlistToggle(e, product)}
-                        aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                        title={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
-                      >
-                        {isInWishlist(product.id) ? '♥' : '♡'}
-                      </button>
-                    </div>
-                    <div className="product-info">
-                      <p className="product-category-label">{product.category?.name || 'General'}</p>
-                      <h3 className="product-name" title={product.name}>{product.name}</h3>
-                      <div className="product-price-row">
-                        <span className="current-price">
-                          ₹{parseFloat(product.price).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-
-                  {/* Add to Cart button */}
-                  <button
-                    className={`add-to-cart-btn shop-add-btn${isOutOfStock ? ' disabled-btn' : ''}`}
-                    onClick={(e) => handleAddToCart(e, product)}
-                    disabled={addingToCart[product.id] || isOutOfStock}
-                    aria-label={isOutOfStock ? `${product.name} is out of stock` : `Add ${product.name} to cart`}
-                  >
-                    {isOutOfStock ? 'Sold Out' : (addingToCart[product.id] ? 'Adding...' : '🛒 Add to Cart')}
-                  </button>
-                </div>
-              );
-            })}
+            {paginatedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
 
           {/* Pagination Controls */}

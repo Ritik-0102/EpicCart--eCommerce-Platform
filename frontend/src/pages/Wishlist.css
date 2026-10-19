@@ -40,9 +40,12 @@
 }
 
 .wishlist-details h3 {
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.45;
   margin: 0 0 10px 0;
-  color: #333;
+  color: var(--color-primary, #1e293b);
+  word-break: break-word;
 }
 
 .wishlist-details .price {

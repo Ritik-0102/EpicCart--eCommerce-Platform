@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Package, CheckCircle2, Clock, AlertTriangle, ArrowRight, ShieldCheck } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { fetchMyOrders } from '../services/api';
 import './Orders.css';
@@ -19,8 +20,9 @@ const Orders = () => {
 
     const loadOrders = async () => {
       try {
+        // Backend now excludes PENDING unpaid attempts by default
         const data = await fetchMyOrders(token);
-        setOrders(data);
+        setOrders(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message || 'Failed to load order history');
       } finally {
@@ -39,49 +41,155 @@ const Orders = () => {
     return <div className="container status-message error">{error}</div>;
   }
 
+  const confirmedOrders = orders.filter(o => o.status !== 'PENDING');
+  const pendingOrders = orders.filter(o => o.status === 'PENDING');
+
   if (orders.length === 0) {
     return (
       <div className="orders-container container empty-state">
-        <h2>Order History</h2>
-        <p>You haven't placed any orders yet.</p>
+        <div className="empty-state-icon">📦</div>
+        <h2>No Confirmed Orders Yet</h2>
+        <p>You haven't completed any purchases yet. Start exploring our premium catalogue!</p>
         <Link to="/products" className="btn btn-primary">Start Shopping</Link>
       </div>
     );
   }
 
+  const getStatusBadge = (status) => {
+    switch (status.toUpperCase()) {
+      case 'PAID':
+        return <span className="status-pill status-paid"><CheckCircle2 size={13} /> Paid & Confirmed</span>;
+      case 'PROCESSING':
+        return <span className="status-pill status-processing"><Clock size={13} /> Processing</span>;
+      case 'PACKED':
+        return <span className="status-pill status-packed"><Package size={13} /> Packed</span>;
+      case 'SHIPPED':
+        return <span className="status-pill status-shipped">🚚 Shipped</span>;
+      case 'DELIVERED':
+        return <span className="status-pill status-delivered">✓ Delivered</span>;
+      case 'CANCELLED':
+        return <span className="status-pill status-cancelled">✕ Cancelled</span>;
+      default:
+        return <span className="status-pill status-pending"><AlertTriangle size={13} /> {status}</span>;
+    }
+  };
+
   return (
     <div className="orders-container container">
-      <h2>Your Order History</h2>
-      
+      <div className="orders-header">
+        <div>
+          <h2>Your Orders</h2>
+          <p className="orders-subtitle">Track, manage and review your verified purchases</p>
+        </div>
+        <span className="orders-verified-badge">
+          <ShieldCheck size={16} />
+          <span>Verified Orders Only</span>
+        </span>
+      </div>
+
+      {/* Confirmed Orders List */}
       <div className="orders-list">
-        {orders.map(order => (
-          <div key={order.id} className="order-card">
-            <div className="order-header">
-              <div>
-                <p className="order-id">Order #{order.id}</p>
-                <p className="order-date">Placed on: {new Date(order.createdAt).toLocaleDateString()}</p>
+        {confirmedOrders.length > 0 ? (
+          confirmedOrders.map(order => (
+            <div key={order.id} className="order-card">
+              <div className="order-header">
+                <div className="order-meta-col">
+                  <div className="order-id-row">
+                    <span className="order-id">Order #{order.id}</span>
+                    {order.razorpayPaymentId && (
+                      <span className="payment-verified-tag">Razorpay Verified</span>
+                    )}
+                  </div>
+                  <p className="order-date">
+                    Placed on {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric'
+                    })}
+                  </p>
+                </div>
+
+                <div className="order-status-badge">
+                  {getStatusBadge(order.status)}
+                </div>
               </div>
-              <div className="order-status-badge">
-                <span className={`status ${order.status.toLowerCase()}`}>
-                  {order.status}
-                </span>
+              
+              <div className="order-body">
+                <div className="order-items-preview">
+                  <span className="order-items-count">
+                    {order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}:
+                  </span>
+                  <div className="order-items-tags">
+                    {order.items?.map(it => (
+                      <span key={it.id} className="order-item-chip">
+                        {it.productName} × {it.quantity}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="order-financials">
+                  <div className="financial-col">
+                    <span className="financial-label">Total Amount</span>
+                    <span className="financial-value">₹{Number(order.total).toFixed(2)}</span>
+                  </div>
+                  <div className="financial-col">
+                    <span className="financial-label">Delivering To</span>
+                    <span className="financial-value address-value">
+                      {order.city ? `${order.city}, ${order.country || 'India'}` : order.shippingAddress}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="order-footer">
+                <Link to={`/orders/${order.id}`} className="btn btn-secondary view-details-btn">
+                  <span>View Details & Receipt</span>
+                  <ArrowRight size={14} />
+                </Link>
               </div>
             </div>
-            
-            <div className="order-body">
-              <p><strong>Total:</strong> ₹{Number(order.total).toFixed(2)}</p>
-              <p><strong>Items:</strong> {order.items.length}</p>
-              <p><strong>Delivering to:</strong> {order.shippingAddress}, {order.city}</p>
-            </div>
-            
-            <div className="order-footer">
-              <Link to={`/orders/${order.id}`} className="btn btn-secondary">
-                View Details
-              </Link>
+          ))
+        ) : (
+          <div className="no-confirmed-notice">
+            <p>You have no confirmed orders yet.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Pending / Incomplete Attempts Section (if any returned) */}
+      {pendingOrders.length > 0 && (
+        <div className="pending-orders-section">
+          <div className="pending-header">
+            <AlertTriangle size={18} className="pending-icon" />
+            <div>
+              <h3>Incomplete Checkout Attempts ({pendingOrders.length})</h3>
+              <p>These orders were initiated but payment was not finalized. They are not confirmed purchases.</p>
             </div>
           </div>
-        ))}
-      </div>
+          <div className="orders-list">
+            {pendingOrders.map(order => (
+              <div key={order.id} className="order-card card-pending-attempt">
+                <div className="order-header">
+                  <div>
+                    <span className="order-id">Attempt #{order.id}</span>
+                    <p className="order-date">Created on {new Date(order.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <span className="status-pill status-pending">Payment Incomplete</span>
+                </div>
+                <div className="order-body">
+                  <p><strong>Amount:</strong> ₹{Number(order.total).toFixed(2)}</p>
+                </div>
+                <div className="order-footer">
+                  <Link to={`/orders/${order.id}`} className="btn btn-primary">
+                    Complete Payment with Razorpay
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

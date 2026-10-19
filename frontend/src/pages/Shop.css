@@ -46,23 +46,7 @@
   cursor: pointer;
 }
 
-.shop-product-card {
-  text-decoration: none;
-  color: inherit;
-  transition: transform 0.2s;
-}
 
-.shop-product-card:hover {
-  transform: translateY(-4px);
-}
-
-.product-category-label {
-  font-size: 0.75rem;
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--space-1);
-}
 
 .pagination-controls {
   display: flex;
@@ -92,51 +76,7 @@
   color: var(--color-text-muted);
 }
 
-/* --- Added for Shop Rewrite with Cart/Wishlist --- */
-.product-card-wrapper {
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-bg-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  overflow: hidden;
-  transition: transform 0.2s, box-shadow 0.2s;
-  height: 100%;
-}
 
-.product-card-wrapper:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-}
-
-.shop-product-card {
-  flex: 1; /* take up remaining space so the button is at the bottom */
-  text-decoration: none;
-  color: inherit;
-  /* removed the transform hover from here, moved to wrapper */
-  transform: none !important;
-}
-
-.shop-add-btn {
-  width: 100%;
-  padding: var(--space-3);
-  background-color: var(--color-primary);
-  color: white;
-  border: none;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-}
-
-.shop-add-btn:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
-}
-
-.shop-add-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
 
 .result-count {
   margin-bottom: var(--space-6);
@@ -342,34 +282,7 @@
   text-decoration: underline;
 }
 
-/* Stock badges */
-.stock-badge {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 0.25rem 0.6rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  border-radius: 9999px;
-  z-index: 2;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
 
-.stock-badge.out-of-stock {
-  background-color: #ef4444;
-  color: #ffffff;
-}
-
-.stock-badge.low-stock {
-  background-color: #f59e0b;
-  color: #ffffff;
-}
-
-.shop-add-btn.disabled-btn {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
 
 /* Pagination Bar */
 .pagination-bar {

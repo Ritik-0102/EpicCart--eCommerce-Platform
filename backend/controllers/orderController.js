@@ -146,64 +146,33 @@ const createOrder = async (req, res, next) => {
 
     const total = subtotal - discount;
 
-    // 4. Create Order and OrderItems in a transaction
-    // Also decrease product stock and clear the cart
-    const order = await prisma.$transaction(async (tx) => {
-      // Create the order
-      const newOrder = await tx.order.create({
-        data: {
-          userId: req.user.id,
-          subtotal,
-          discount,
-          total,
-          couponId,
-          status: 'PENDING', // Will change to PAID once payment gateway is integrated
-          shippingAddress,
-          city,
-          postalCode,
-          country,
-          items: {
-            create: cart.items.map(item => ({
-              productId: item.productId,
-              productName: item.product.name,
-              price: item.product.price,     // Snapshot of price
-              quantity: item.quantity        // Snapshot of quantity
-            }))
-          }
-        },
-        include: {
-          items: true
+    // 4. Create Order and OrderItems (in PENDING status, awaiting payment verification)
+    // Product stock is decremented and cart cleared ONLY once payment is cryptographically verified
+    const order = await prisma.order.create({
+      data: {
+        userId: req.user.id,
+        subtotal,
+        discount,
+        total,
+        couponId,
+        status: 'PENDING',
+        shippingAddress,
+        city,
+        postalCode,
+        country,
+        items: {
+          create: cart.items.map(item => ({
+            productId: item.productId,
+            productName: item.product.name,
+            price: item.product.price,     // Snapshot of price
+            quantity: item.quantity        // Snapshot of quantity
+          }))
         }
-      });
-
-      // Decrease stock for each product
-      for (const item of cart.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } }
-        });
+      },
+      include: {
+        items: true
       }
-
-      // Clear the user's cart ONLY after successful order creation
-      await tx.cartItem.deleteMany({
-        where: { cartId: cart.id }
-      });
-
-      return newOrder;
     });
-
-    // Send email notification (Fail-safe, shouldn't crash order creation)
-    try {
-      const sendEmail = require('../utils/sendEmail');
-      await sendEmail({
-        email: req.user.email,
-        subject: `Order Confirmation - ${order.id}`,
-        message: `Thank you for your order, ${req.user.name}!\n\nYour order ID is ${order.id}.\nTotal amount: $${order.total}\n\nWe will notify you once it ships.`,
-        html: `<h2>Thank you for your order, ${req.user.name}!</h2><p>Your order ID is <strong>${order.id}</strong>.</p><p>Total amount: $${order.total}</p><p>We will notify you once it ships.</p>`
-      });
-    } catch (emailError) {
-      console.error('Email could not be sent:', emailError);
-    }
 
     res.status(201).json({
       success: true,
@@ -223,8 +192,17 @@ const createOrder = async (req, res, next) => {
  */
 const getMyOrders = async (req, res, next) => {
   try {
+    const { includePending } = req.query;
+    
+    // Only return confirmed/paid orders (PAID, PROCESSING, PACKED, SHIPPED, DELIVERED, CANCELLED)
+    // Unpaid PENDING checkout attempts must not appear as confirmed purchases unless explicitly requested
+    const whereClause = {
+      userId: req.user.id,
+      ...(includePending === 'true' ? {} : { NOT: { status: 'PENDING' } })
+    };
+
     const orders = await prisma.order.findMany({
-      where: { userId: req.user.id },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
       include: {
         items: true
