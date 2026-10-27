@@ -691,6 +691,29 @@ All 10 edge cases of administrative routing were successfully verified:
   - Primary CTA click verified to navigate to `/products`.
   - Frontend production build: `vite build` completed in 1.18s with 0 errors.
 
+### Day 28: Fix Hero Banner Text Overlap and Match Reference Design
+- **Root Cause of Text/Category Overlap:**
+  - Setting the multi-category marketplace asset as a full-bleed CSS background caused text content on the left to overlap product images and built-in category labels (`Beauty & Personal Care`, `Electronics`) on viewports between 1024px and 1440px.
+- **Architectural Solution & Reference Match:**
+  - Refactored the hero into a stable two-column CSS Grid architecture (`.hero-container`):
+    - **Left Column:** Hosts the editorial copy (Trust badge "India’s Trusted Online Marketplace", bold headline "Everything You Love, All in One Place.", supporting description, primary "Shop Now" and secondary "Explore Categories" CTAs, and 4-item trust-benefits row).
+    - **Right Column:** Houses the marketplace visual inside an elegant, proportionate showcase frame (`.hero-image-frame`) with `object-fit: cover; object-position: 85% center;`.
+  - Guarantees complete separation: text and image occupy distinct layout zones, eliminating any possibility of text overlapping image category labels.
+- **Responsive System Across 10 Viewports:**
+  - Desktop ($\ge 992$px): Balanced 2-column composition with generous gutter spacing.
+  - Tablet & Mobile ($< 992$px): Seamlessly stacks content on top and image frame below, preserving text readability and product label clarity without awkward cropping or horizontal scrolling.
+  - Mobile ($\le 480$px): Full-width stacked buttons and 2x2 grid for trust-benefits items.
+- **Files Modified:**
+  - `frontend/src/components/home/Hero.jsx` (Two-column layout, reference-matched copy, semantic CTAs)
+  - `frontend/src/components/home/Hero.css` (Grid architecture, typography clamp, button elevation, responsive breakpoints)
+  - `Admin_Scratchpad.md` & `Project - Documentation.md` (Updated logs and test evidence)
+- **Verification Evidence:**
+  - Verified across all 10 required viewports: 320px, 360px, 390px, 430px, 768px, 1024px, 1280px, 1366px, 1440px, 1920px.
+  - 0 overlaps detected across all viewports.
+  - Visual screenshots captured and inspected for 1440px, 1024px, 768px, and 390px.
+  - Production build: `npm --prefix frontend run build` completed cleanly in 814ms with 0 errors.
+
+
 
 
 
