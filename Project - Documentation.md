@@ -646,5 +646,52 @@ All 10 edge cases of administrative routing were successfully verified:
   - Production build: `vite build` completed in 5.59s with 0 errors.
   - Code analysis: `oxlint` completed in 92ms with 0 errors.
 
+### Day 26: Permanent Product Title Clipping Fix
+- **Root Cause Identified:**
+  - CSS selector clash on un-scoped `.product-title` in `ProductCard.css` and `ProductDetails.css`. When bundled into `dist/assets/index-*.css`, `ProductCard.css` rules took precedence over `ProductDetails.css`, forcing line clamping (`-webkit-line-clamp: 2`) and `overflow: hidden` onto the product detail page `<h1>`.
+  - In `ProductCard.css`, cards were restricted to 2 lines on desktop and lacked explicit descender breathing room, causing letters with lower stems (`g`, `y`, `p`, `q`, `j`) to approach or be sliced by the divider border.
+- **Key Fixes Implemented:**
+  - `ProductCard.css`:
+    - Scoped title styles to `.product-card .product-title`.
+    - Allowed 3 lines of text on desktop/tablet with `-webkit-line-clamp: 3; line-clamp: 3; line-height: 1.45; min-height: calc(1.45em * 3 + 6px); padding-bottom: 6px; box-sizing: content-box;`.
+    - Allowed 2 lines on mobile ($\le 480$px) with `-webkit-line-clamp: 2; line-clamp: 2; line-height: 1.4; min-height: calc(1.4em * 2 + 6px); padding-bottom: 6px;`.
+    - Added `min-width: 0; width: 100%; word-break: break-word; overflow-wrap: break-word;` to guarantee robust flexbox text wrapping.
+    - Verified `.product-footer` remains in normal flex document flow (`margin-top: auto;`) with zero chance of overlapping title text.
+  - `ProductDetails.css`:
+    - Scoped title styles to `.product-details-info .product-title, .product-details-page .product-title`.
+    - Explicitly disabled clamping: `-webkit-line-clamp: unset; line-clamp: unset; -webkit-box-orient: unset; display: block; overflow: visible; height: auto; min-height: unset; max-height: none;`.
+    - Increased line-height to `1.35` with `word-break: break-word; overflow-wrap: break-word; font-size: clamp(1.4rem, 4vw, 2.25rem);`.
+- **Automated Verification:**
+  - Tested 10 target viewports (`320px`, `360px`, `390px`, `430px`, `768px`, `1024px`, `1280px`, `1366px`, `1440px`, `1920px`) using headless Chromium evaluating live DOM metrics.
+  - Verified 0 text overlaps between titles and footers/prices across all cards.
+  - Verified product details page has 100% visible text with `scrollHeight === clientHeight` and 0% truncation.
+  - Production build: `npm --prefix frontend run build` succeeded cleanly with 0 errors.
+
+### Day 27: Final Homepage Hero Redesign & Integration
+- **Completed Work:**
+  - Integrated the supplied multi-category marketplace asset `frontend/public/images/epiccart-marketplace-hero.png` (2048 x 768 px) as the homepage hero artwork.
+  - Completely replaced the previous hero copy, floating cards, and marketing pills with real HTML/React elements and refined marketplace copy:
+    - **Eyebrow:** `YOUR EVERYDAY, UPGRADED`.
+    - **Headline:** `Good Finds.<br />Great Prices.<br />Everything on <span className="hero__title-highlight">EpicCart.</span>`.
+    - **Description:** `From the tech you've been eyeing to the little things that make home feel better — find your next favourite across every category.`.
+    - **Primary CTA:** `Explore the Store →` linking directly to the real store catalog (`/products`).
+    - **Secondary CTA:** `Shop by Category` smoothly scrolling to the `#categories` section with a `130px` offset accommodating the sticky navbar.
+    - **Trust Indicators:** Verified trio of platform claims ("Everyday Essentials", "Fast & Convenient Delivery", "Secure Checkout") with clean `lucide-react` icons.
+  - **Responsive Dual-Presentation Architecture:**
+    - On Desktop ($\ge 900$px): Artfully positioned editorial text in the spacious left cream area (~36%–44% width), leaving the center and right unobstructed to showcase the multi-category products from the background image.
+    - On Mobile & Narrow Tablet ($< 900$px): Rendered the full, un-cropped 2048 x 768 artwork directly below the content in a sleek visual showcase frame, ensuring 100% text readability and 0% product cropping.
+- **Files Modified:**
+  - `frontend/src/components/home/Hero.jsx` (New BEM component structure, real copy, semantic links, smooth scroll)
+  - `frontend/src/components/home/Hero.css` (Background sizing, responsive positioning, typography, buttons)
+  - `frontend/src/components/home/Categories.css` (Added `scroll-margin-top: 130px`)
+  - `Admin_Scratchpad.md` & `Project - Documentation.md` (Updated logs and verification metrics)
+- **Verification Evidence:**
+  - Tested across all 6 target viewports (1440px, 1280px, 1024px, 768px, 390px, 360px).
+  - 0px horizontal overflow across all tested viewports.
+  - Primary CTA click verified to navigate to `/products`.
+  - Frontend production build: `vite build` completed in 1.18s with 0 errors.
+
+
+
 
 

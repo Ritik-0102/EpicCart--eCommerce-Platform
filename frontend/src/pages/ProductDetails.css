@@ -49,12 +49,22 @@
   margin-bottom: var(--space-2);
 }
 
-.product-title {
-  font-size: clamp(1.35rem, 5vw, 2.25rem);
-  line-height: 1.25;
+.product-details-info .product-title,
+.product-details-page .product-title {
+  font-size: clamp(1.4rem, 4vw, 2.25rem);
+  line-height: 1.35;
   margin-bottom: var(--space-4);
   color: var(--color-text-main);
   word-break: break-word;
+  overflow-wrap: break-word;
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  -webkit-box-orient: unset;
+  overflow: visible;
+  height: auto;
+  min-height: unset;
+  max-height: none;
 }
 
 .product-price {

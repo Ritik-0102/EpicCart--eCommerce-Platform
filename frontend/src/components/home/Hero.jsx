@@ -1,89 +1,75 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, ShieldCheck, Truck, Package } from 'lucide-react';
+import { ShoppingBag, Truck, ShieldCheck } from 'lucide-react';
 import './Hero.css';
 
 const Hero = () => {
+  const handleScrollToCategories = (e) => {
+    const categoriesSection = document.getElementById('categories');
+    if (categoriesSection) {
+      e.preventDefault();
+      categoriesSection.scrollIntoView({ behavior: 'smooth' });
+      window.history.pushState(null, '', '#categories');
+    }
+  };
+
   return (
-    <section className="hero-section" aria-label="Featured Collection">
-      <div className="container hero-container">
-        {/* Left Column: Editorial & Value Proposition */}
-        <div className="hero-content">
-          <div className="hero-eyebrow">
-            <Sparkles size={14} className="eyebrow-icon" />
-            <span>THE NEW SEASON • CURATED MARKETPLACE</span>
+    <section className="hero" aria-label="Featured Marketplace Showcase">
+      <div className="container hero__container">
+        {/* Editorial Content */}
+        <div className="hero__content">
+          <div className="hero__eyebrow">
+            YOUR EVERYDAY, UPGRADED
           </div>
 
-          <h1 className="hero-title">
-            Everyday Luxury, <br className="hidden-mobile" />
-            <span className="hero-title-highlight">Engineered</span> for Life.
+          <h1 className="hero__title">
+            Good Finds.<br />
+            Great Prices.<br />
+            Everything on <span className="hero__title-highlight">EpicCart.</span>
           </h1>
 
-          <p className="hero-description">
-            Discover over 700+ verified products across flagship electronics, contemporary apparel, 
-            tri-ply cookware, and organic lifestyle essentials—delivered directly with secure verification.
+          <p className="hero__description">
+            From the tech you've been eyeing to the little things that make home feel better — find your next favourite across every category.
           </p>
 
-          <div className="hero-actions">
-            <Link to="/products" className="btn btn-primary hero-btn-primary">
-              <span>Explore Collection</span>
-              <ArrowRight size={18} />
+          <div className="hero__actions">
+            <Link to="/products" className="hero__btn hero__btn--primary">
+              <span>Explore the Store &rarr;</span>
             </Link>
-            <Link to="/products?sort=rating" className="btn btn-outline hero-btn-secondary">
-              <span>Shop Bestsellers</span>
-            </Link>
+            <a 
+              href="#categories" 
+              onClick={handleScrollToCategories} 
+              className="hero__btn hero__btn--secondary"
+            >
+              <span>Shop by Category</span>
+            </a>
           </div>
 
-          {/* Value Proposition Micro-Pills */}
-          <div className="hero-trust-row">
-            <div className="trust-pill">
-              <ShieldCheck size={16} className="trust-icon" />
-              <span>100% Authentic</span>
+          <div className="hero__trust">
+            <div className="hero__trust-item">
+              <ShoppingBag size={16} className="hero__trust-icon" aria-hidden="true" />
+              <span>Everyday Essentials</span>
             </div>
-            <div className="trust-pill">
-              <Truck size={16} className="trust-icon" />
-              <span>Express Delivery</span>
+            <div className="hero__trust-item">
+              <Truck size={16} className="hero__trust-icon" aria-hidden="true" />
+              <span>Fast &amp; Convenient Delivery</span>
             </div>
-            <div className="trust-pill">
-              <Package size={16} className="trust-icon" />
-              <span>7 Curated Departments</span>
+            <div className="hero__trust-item">
+              <ShieldCheck size={16} className="hero__trust-icon" aria-hidden="true" />
+              <span>Secure Checkout</span>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Visual Merchandising Showcase */}
-        <div className="hero-visual">
-          <div className="hero-image-frame">
-            <img 
-              src="https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=1000&q=80" 
-              alt="Premium electronics and workspace essentials"
-              className="hero-main-img"
-              loading="eager"
-            />
-            <div className="hero-image-overlay"></div>
-          </div>
-
-          {/* Floating Merchandising Card 1 (Top Left) */}
-          <div className="hero-floating-badge badge-top-left">
-            <div className="badge-icon-box">
-              <Sparkles size={16} />
-            </div>
-            <div className="badge-info">
-              <span className="badge-tag">Featured Drop</span>
-              <span className="badge-value">Curated Electronics</span>
-            </div>
-          </div>
-
-          {/* Floating Merchandising Card 2 (Bottom Right) */}
-          <div className="hero-floating-badge badge-bottom-right">
-            <div className="badge-icon-box badge-icon-catalog">
-              <Package size={16} />
-            </div>
-            <div className="badge-info">
-              <span className="badge-tag">Curated Catalog</span>
-              <span className="badge-value">Over 700 Products</span>
-            </div>
-          </div>
+        {/* Mobile / Narrow Tablet Visual Showcase (Un-cropped supplied asset) */}
+        <div className="hero__mobile-visual" aria-hidden="true">
+          <img 
+            src="/images/epiccart-marketplace-hero.png" 
+            alt=""
+            className="hero__mobile-image"
+            loading="eager"
+            fetchPriority="high"
+          />
         </div>
       </div>
     </section>

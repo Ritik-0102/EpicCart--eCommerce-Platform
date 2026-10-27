@@ -152,21 +152,24 @@
 }
 
 /* Product Title - Never Clipped, Preserves Descenders */
-.product-title {
+.product-card .product-title {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--color-primary);
   line-height: 1.45;
   margin-bottom: var(--space-2);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: calc(1.45em * 2 + 6px);
+  min-height: calc(1.45em * 3 + 6px);
   padding-bottom: 6px;
   box-sizing: content-box;
   word-break: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
+  width: 100%;
   transition: color var(--transition-fast);
 }
 
@@ -287,11 +290,13 @@
     padding: 0.625rem;
   }
 
-  .product-title {
+  .product-card .product-title {
     font-size: 0.8125rem;
     line-height: 1.4;
-    min-height: calc(1.4em * 2 + 4px);
-    padding-bottom: 4px;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    min-height: calc(1.4em * 2 + 6px);
+    padding-bottom: 6px;
     margin-bottom: var(--space-2);
   }
 
