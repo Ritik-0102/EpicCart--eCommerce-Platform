@@ -1,0 +1,20 @@
+# ConfigMap holds non-sensitive configuration keys for the backend application
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # Unique name used by Deployments to reference this ConfigMap
+  name: epiccart-backend-config
+  labels:
+    app.kubernetes.io/name: epiccart
+    app.kubernetes.io/component: backend
+data:
+  # Port the Express server listens on inside the container
+  PORT: "5000"
+  # Sets Node.js runtime to production mode
+  NODE_ENV: "production"
+  # Allowed CORS origin for browser requests
+  FRONTEND_URL: "https://epiccart.vercel.app"
+  # SMTP mail server host for sending order notification emails
+  EMAIL_HOST: "sandbox.smtp.mailtrap.io"
+  # SMTP mail server port
+  EMAIL_PORT: "2525"

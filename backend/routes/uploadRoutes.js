@@ -1,13 +1,14 @@
+// File upload routing: manages image uploads for product catalog media
 const express = require('express');
 const router = express.Router();
 const { uploadImage } = require('../controllers/uploadController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const multer = require('multer');
 
-// Configure multer to use memory storage
+// Configure Multer to buffer files in memory before uploading to Cloudinary
 const storage = multer.memoryStorage();
 
-// File filter to only allow specific image types
+// File filter to restrict uploads to safe image MIME types
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
   if (allowedMimeTypes.includes(file.mimetype)) {
@@ -17,14 +18,14 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// Set 5MB size limit to prevent server memory exhaustion
 const upload = multer({ 
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter
 });
 
-// Protect and admin middlewares ensure only admins can upload
+// Protect and admin middlewares ensure only authenticated administrators can upload product media
 router.post('/', protect, admin, upload.single('image'), uploadImage);
 
 module.exports = router;
-

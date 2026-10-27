@@ -1,10 +1,12 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema file defining database models, relations, and data types
+// This schema maps to PostgreSQL tables on local Docker or Neon Serverless
 
+// Generate the JavaScript/TypeScript client library
 generator client {
   provider = "prisma-client-js"
 }
 
+// PostgreSQL database connection configured via the DATABASE_URL environment variable
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -14,6 +16,7 @@ datasource db {
 // EPIC-CART DATABASE MODELS
 // -------------------------------------------------
 
+// Product category table (e.g. Electronics, Clothing, Mobile)
 model Category {
   id          Int       @id @default(autoincrement())
   name        String    @unique
@@ -21,9 +24,11 @@ model Category {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
+  // One-to-many: a single category has many associated products
   products    Product[]
 }
 
+// Catalog items available for purchase
 model Product {
   id                Int       @id @default(autoincrement())
   name              String                                  
@@ -41,32 +46,38 @@ model Product {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
+  // Many-to-one relationship to Category
   categoryId        Int
   category          Category  @relation(fields: [categoryId], references: [id])
   
+  // Relations to other entities
   cartItems         CartItem[]
   wishlistItems     WishlistItem[]
   reviews           Review[]
   inventoryLogs     InventoryLog[]
 }
 
+// Registered customer and admin accounts
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
-  password  String
-  role      String   @default("USER")
+  password  String   // Hashed using bcrypt
+  role      String   @default("USER") // "USER" or "ADMIN"
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
+  // One-to-one relations with shopping state
   cart      Cart?
   wishlist  Wishlist?
+  // One-to-many relations
   orders    Order[]
   reviews   Review[]
   auditLogs AuditLog[]
 }
 
+// Persistent shopping cart (one per user)
 model Cart {
   id        Int        @id @default(autoincrement())
   userId    Int        @unique
@@ -74,6 +85,7 @@ model Cart {
   items     CartItem[]
 }
 
+// Line items inside a customer's shopping cart
 model CartItem {
   id        Int     @id @default(autoincrement())
   cartId    Int
@@ -82,9 +94,11 @@ model CartItem {
   product   Product @relation(fields: [productId], references: [id])
   quantity  Int     @default(1)
 
+  // Ensures a product can only appear once per cart; quantity is incremented instead
   @@unique([cartId, productId])
 }
 
+// Saved products list for logged-in users
 model Wishlist {
   id        Int            @id @default(autoincrement())
   userId    Int            @unique
@@ -92,6 +106,7 @@ model Wishlist {
   items     WishlistItem[]
 }
 
+// Line items saved in a user's wishlist
 model WishlistItem {
   id         Int      @id @default(autoincrement())
   wishlistId Int
@@ -99,9 +114,11 @@ model WishlistItem {
   productId  Int
   product    Product  @relation(fields: [productId], references: [id])
 
+  // A product can only be in a user's wishlist once
   @@unique([wishlistId, productId])
 }
 
+// Promotional discount coupons
 model Coupon {
   id            Int       @id @default(autoincrement())
   code          String    @unique
@@ -115,6 +132,7 @@ model Coupon {
   orders        Order[]
 }
 
+// Customer purchase orders
 model Order {
   id              Int         @id @default(autoincrement())
   userId          Int
@@ -134,27 +152,30 @@ model Order {
   adminNotes      String?
   createdAt       DateTime    @default(now())
   
-  // Razorpay payment integration fields
+  // Razorpay payment integration tracking IDs
   razorpayOrderId   String?
   razorpayPaymentId String?
   razorpaySignature String?
   
+  // Line items purchased in this order
   items           OrderItem[]
 }
 
+// Historical snapshot of products purchased in an order
 model OrderItem {
   id          Int     @id @default(autoincrement())
   orderId     Int
   order       Order   @relation(fields: [orderId], references: [id])
   productId   Int
-  productName String
-  price       Float
+  productName String  // Snapshotted in case product name changes later
+  price       Float   // Snapshotted price at time of purchase
   quantity    Int
 }
 
+// Customer product ratings and reviews
 model Review {
   id        Int      @id @default(autoincrement())
-  rating    Int
+  rating    Int      // 1 to 5 stars
   comment   String?
   isApproved Boolean @default(true)
   userId    Int
@@ -163,9 +184,11 @@ model Review {
   product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
 
+  // A user can submit at most one review per product
   @@unique([userId, productId])
 }
 
+// Inventory change audit trail (tracks stock adjustments and sales)
 model InventoryLog {
   id          Int      @id @default(autoincrement())
   productId   Int
@@ -174,24 +197,26 @@ model InventoryLog {
   prevQuantity Int
   newQuantity  Int
   adjustment   Int
-  reason      String
+  reason      String   // e.g. "Restock", "Order Placed", "Manual Adjustment"
   createdAt   DateTime @default(now())
 }
 
+// Security audit log for tracking administrator actions
 model AuditLog {
   id          Int      @id @default(autoincrement())
   adminId     Int
   admin       User     @relation(fields: [adminId], references: [id])
-  action      String
-  targetType  String
+  action      String   // e.g. "CREATE_PRODUCT", "UPDATE_ORDER_STATUS"
+  targetType  String   // e.g. "Product", "Order"
   targetId    String?
-  metadata    String?  // JSON string
+  metadata    String?  // JSON string storing extra event context
   createdAt   DateTime @default(now())
 }
 
+// Key-value store configuration settings (e.g. maintenance mode, announcements)
 model StoreSettings {
   id            Int      @id @default(autoincrement())
   key           String   @unique
-  value         String   // JSON string or plain text
+  value         String   // JSON string or plain text setting value
   updatedAt     DateTime @updatedAt
 }

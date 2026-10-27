@@ -1,49 +1,49 @@
+// Authentication controller handling user registration, login, and profile retrieval
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const prisma = new PrismaClient();
 
-// Helper function to generate a JWT token
+// Helper function to sign a JSON Web Token (JWT) with the user's ID
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: '30d', // Token remains valid for 30 days
   });
 };
 
-// @desc    Register a new user
+// @desc    Register a new customer account
 // @route   POST /api/auth/register
 const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
-    // Validate input
+    // Validate that required fields were sent
     if (!name || !email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide all required fields' });
     }
 
-    // Check if user already exists
+    // Check if an account already exists with this email address
     const userExists = await prisma.user.findUnique({ where: { email } });
     if (userExists) {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });
     }
 
-    // Hash the password securely using bcrypt
+    // Generate salt and hash the password securely with bcrypt (10 rounds)
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create the user in the database
+    // Create the user record in PostgreSQL
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        // Optional: allow passing role for testing purposes (not secure for prod)
         role: req.body.role || 'USER'
       },
     });
 
-    // Respond with user data and the JWT token (Exclude the password!)
+    // Respond with user details and signed JWT (password hash is strictly excluded)
     res.status(201).json({
       success: true,
       data: {
@@ -59,21 +59,21 @@ const registerUser = async (req, res, next) => {
   }
 };
 
-// @desc    Authenticate a user & get token
+// @desc    Authenticate existing user credentials and return a token
 // @route   POST /api/auth/login
 const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
-    // Validate input
+    // Validate email and password presence
     if (!email || !password) {
       return res.status(400).json({ success: false, message: 'Please provide email and password' });
     }
 
-    // Find the user by email
+    // Find the user by their unique email
     const user = await prisma.user.findUnique({ where: { email } });
 
-    // Check if user exists and if the password matches the hashed password
+    // Compare the plaintext password against the stored bcrypt hash
     if (user && (await bcrypt.compare(password, user.password))) {
       res.status(200).json({
         success: true,
@@ -86,6 +86,7 @@ const loginUser = async (req, res, next) => {
         },
       });
     } else {
+      // 401 Unauthorized for incorrect email or password
       res.status(401).json({ success: false, message: 'Invalid email or password' });
     }
   } catch (error) {
@@ -93,11 +94,11 @@ const loginUser = async (req, res, next) => {
   }
 };
 
-// @desc    Get user profile (Protected Route)
+// @desc    Get current user profile (Protected route)
 // @route   GET /api/auth/profile
 const getProfile = async (req, res, next) => {
   try {
-    // req.user is set by the protect middleware based on the JWT token
+    // req.user.id is populated by the protect middleware after verifying the JWT
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
       select: {
@@ -106,7 +107,7 @@ const getProfile = async (req, res, next) => {
         email: true,
         role: true,
         createdAt: true
-        // We strictly DO NOT select the password field here
+        // Password field is omitted from select for security
       }
     });
 
@@ -124,4 +125,3 @@ const getProfile = async (req, res, next) => {
 };
 
 module.exports = { registerUser, loginUser, getProfile };
-

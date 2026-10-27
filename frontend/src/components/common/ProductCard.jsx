@@ -1,3 +1,4 @@
+// Reusable storefront ProductCard component displayed in catalog grids and carousels
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Heart, ShoppingBag, Star } from 'lucide-react';
@@ -7,25 +8,32 @@ import { AuthContext } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import './ProductCard.css';
 
+// Fallback placeholder image used if product imageUrl fails to load
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=600&q=80';
 
 const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
+  // Global shopping contexts
   const { addToCart } = useContext(CartContext);
   const { addToWishlist, removeFromWishlist, isInWishlist, getWishlistItemId } = useContext(WishlistContext);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // Local state for add-to-cart spinner animation
   const [localAdding, setLocalAdding] = useState(false);
   const isAdding = addingToCart || localAdding;
 
+  // Determine inventory and wishlist flags
   const inWishlist = isInWishlist(product.id);
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= (product.lowStockThreshold || 5);
 
+  // Handle adding an item to the shopping cart
   const handleAddToCartClick = async (e) => {
+    // Prevent navigating to the product details page when clicking the button
     e.preventDefault();
     e.stopPropagation();
 
+    // Prompt user to log in if they are a guest
     if (!user) {
       toast.error('Please log in to add items to your cart.');
       navigate('/login');
@@ -37,6 +45,7 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
       return;
     }
 
+    // Call custom handler if provided (e.g. from parent), otherwise use default context
     if (onAddToCart) {
       onAddToCart(product);
     } else {
@@ -51,6 +60,7 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
     }
   };
 
+  // Toggle item in and out of the user's wishlist
   const handleWishlistClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -77,11 +87,13 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
     }
   };
 
+  // Format currency in Indian Rupees (INR) with two decimal places
   const formattedPrice = parseFloat(product.price).toLocaleString('en-IN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
 
+  // Calculate discount percentage if original price is greater than selling price
   const hasDiscount = Boolean(product.originalPrice && product.originalPrice > product.price);
   const discountPercent = hasDiscount
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -94,6 +106,7 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
     : null;
 
   return (
+    // Wrap entire card in React Router Link to navigate to single product details page
     <Link 
       to={`/products/${product.id}`} 
       className={`product-card ${isOutOfStock ? 'card-out-of-stock' : ''}`}
@@ -118,7 +131,7 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
           <span className="stock-badge badge-in-stock">In Stock</span>
         )}
 
-        {/* Wishlist Button */}
+        {/* Wishlist Toggle Button */}
         <button 
           type="button"
           className={`product-wishlist-btn ${inWishlist ? 'is-active' : ''}`}
@@ -130,9 +143,9 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
         </button>
       </div>
 
-      {/* Product Information */}
+      {/* Product Information Body */}
       <div className="product-body">
-        {/* Category & Optional Verified Rating */}
+        {/* Category & Rating */}
         <div className="product-meta-row">
           <span className="product-category-tag">
             {product.category?.name || 'Curated'}
@@ -150,7 +163,7 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
           {product.name}
         </h4>
 
-        {/* Price & Action Row */}
+        {/* Price & Add to Cart Footer */}
         <div className="product-footer">
           <div className="price-stack">
             <div className="price-current-line">
@@ -165,6 +178,7 @@ const ProductCard = ({ product, addingToCart = false, onAddToCart }) => {
             )}
           </div>
 
+          {/* Quick Add to Cart Button */}
           <button 
             type="button"
             className={`product-cart-btn ${isOutOfStock ? 'btn-out-of-stock' : ''}`}

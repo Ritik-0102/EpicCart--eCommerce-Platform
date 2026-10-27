@@ -1,45 +1,59 @@
+# Compose file format version
 version: '3.8'
 
+# Coordinated services that make up the full-stack application
 services:
+  # Local PostgreSQL database service
   db:
+    # Use official lightweight PostgreSQL 15 Alpine image
     image: postgres:15-alpine
     container_name: epiccart-db
     environment:
       POSTGRES_USER: epiccart_user
       POSTGRES_PASSWORD: epiccart_password
       POSTGRES_DB: epiccart_db
+    # Map host port 5432 to container port 5432 for local database inspection
     ports:
       - "5432:5432"
+    # Store database data in a persistent Docker volume so records survive restarts
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  # Node.js Express backend API service
   backend:
+    # Build image using backend/Dockerfile
     build: ./backend
     container_name: epiccart-backend
+    # Map host port 5000 to container port 5000
     ports:
       - "5000:5000"
     environment:
       - PORT=5000
+      # Connect to the local db service using its internal Docker DNS name "db:5432"
       - DATABASE_URL=postgresql://epiccart_user:epiccart_password@db:5432/epiccart_db?schema=public
       - JWT_SECRET=local_development_secret
       - EMAIL_HOST=sandbox.smtp.mailtrap.io
       - EMAIL_PORT=2525
       - EMAIL_USER=test_user
       - EMAIL_PASS=test_pass
+    # Make sure the db container starts before the backend container
     depends_on:
       - db
-    # In a real local scenario, you might want a command to run migrations before starting
-    command: >
-      sh -c "npx prisma migrate deploy && npm start"
+    # Start the Express server. To push schema to the local db: docker-compose run --rm backend npx prisma db push
+    command: npm start
 
+  # React Vite frontend served via Nginx
   frontend:
+    # Build image using frontend/Dockerfile (multi-stage build)
     build: ./frontend
     container_name: epiccart-frontend
+    # Map host port 80 to container port 80 so the app opens at http://localhost
     ports:
       - "80:80"
+    # Wait for the backend container to start before running frontend
     depends_on:
       - backend
 
+# Named volume managed by Docker for PostgreSQL data persistence
 volumes:
   pgdata:
-

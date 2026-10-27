@@ -1,0 +1,23 @@
+# Ignore host node_modules so we don't accidentally copy Windows binaries into Linux
+node_modules
+
+# Ignore local build output folders to ensure a completely fresh build inside Docker
+dist
+dist-ssr
+
+# Ignore local environment files and credentials
+*.local
+.env
+.env.production
+
+# Ignore version control metadata
+.git
+
+# Ignore package manager debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Do not copy Docker configuration files into the container image itself
+Dockerfile
+.dockerignore

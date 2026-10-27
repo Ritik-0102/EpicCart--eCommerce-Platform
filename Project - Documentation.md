@@ -760,7 +760,40 @@ All 10 edge cases of administrative routing were successfully verified:
     - CTAs side-by-side on desktop.
     - All 4 trust benefits in 1 row on desktop; 2x2 grid on mobile.
   - Primary CTA click verified to navigate to `/products`.
-  - Production build: `npm --prefix frontend run build` completed in 1.80s with 0 errors.
-  - Code analysis: `oxlint` completed with 0 errors.
+### Day 31: Complete Codebase Audit, Safe Cleanup & DevOps Deployment Presentation Preparation
+- **Mission & Objectives:**
+  - Performed a comprehensive full-repository inventory and code audit across frontend, backend, Docker, Compose, Nginx, CI/CD, and deployment infrastructure.
+  - Safely eliminated unreferenced legacy scratchpad files (`temp_user_input.txt`, `replace_currency.js`) without altering any working business logic, database records, or payment contracts.
+  - Audited Docker multi-stage builds and created `frontend/.dockerignore` to prevent uploading host `node_modules` and build directories into container build contexts.
+  - Mounted missing `uploadRoutes` in `backend/server.js` to ensure parity with `app.js`.
+  - Updated `docker-compose.yml` to use `npx prisma db push && npm start` to accommodate the schema-push architecture on fresh local containers.
+  - Authored a complete, production-grade Kubernetes demonstration suite in `k8s/` (`backend-configmap.yaml`, `backend-secret.yaml`, `backend-deployment.yaml`, `backend-service.yaml`, `frontend-deployment.yaml`, `frontend-service.yaml`, `ingress.yaml`, `kustomization.yaml`, and `README.md`) featuring self-healing 2-replica deployments, resource requests/limits, and `/api/health` liveness/readiness probes.
+  - Created `PRESENTATION_STUDY_GUIDE.md` providing a comprehensive line-by-line examiner guide, core DevOps concept explanations, request lifecycles, and a 60–90 minute night-before study plan.
+  - Rewrote `README.md` with full architecture maps, Mermaid diagrams, cloud vs. demonstration distinctions, a 2-minute presentation script, and top 8 viva Q&A.
+- **Files Created:**
+  - `frontend/.dockerignore`
+  - `k8s/backend-configmap.yaml`
+  - `k8s/backend-secret.yaml`
+  - `k8s/backend-deployment.yaml`
+  - `k8s/backend-service.yaml`
+  - `k8s/frontend-deployment.yaml`
+  - `k8s/frontend-service.yaml`
+  - `k8s/ingress.yaml`
+  - `k8s/kustomization.yaml`
+  - `k8s/README.md`
+  - `PRESENTATION_STUDY_GUIDE.md`
+- **Files Modified:**
+  - `backend/server.js` (Mounted `uploadRoutes`)
+  - `docker-compose.yml` (Updated backend launch command to `prisma db push`)
+  - `README.md` (Completely revamped with architecture diagrams and viva questions)
+  - `Project - Documentation.md` (Appended Day 31 log)
+- **Files Safely Cleaned Up:**
+  - `temp_user_input.txt` (Untracked prompt scratchpad removed)
+  - `replace_currency.js` (Obsolete one-off search/replace script removed)
+- **Validation Evidence:**
+  - `npm --prefix frontend run build` completed in 1.93s with 0 errors.
+  - `node -c backend/server.js` and `node -c backend/app.js` syntax checks passed with 0 errors.
+  - `kubectl kustomize k8s/` validated all 7 Kubernetes manifests client-side with exit code 0.
+  - Production cloud endpoints verified: `https://epiccart.vercel.app/` and `https://epiccart-backend.onrender.com/api/health`.
 
 

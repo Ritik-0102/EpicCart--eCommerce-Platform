@@ -1,0 +1,16 @@
+# Kustomization groups and applies all Kubernetes manifests as an atomic release
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Ordered list of Kubernetes resources included in this deployment suite
+resources:
+  # Configuration and secrets (must be created before Deployments reference them)
+  - backend-configmap.yaml
+  - backend-secret.yaml
+  # Workloads (Deployments)
+  - backend-deployment.yaml
+  - frontend-deployment.yaml
+  # Networking (Services and Ingress)
+  - backend-service.yaml
+  - frontend-service.yaml
+  - ingress.yaml

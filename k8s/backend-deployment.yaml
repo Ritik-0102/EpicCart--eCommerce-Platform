@@ -1,0 +1,65 @@
+# Deployment manages replicated backend Pods and ensures self-healing
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: epiccart-backend
+  labels:
+    app.kubernetes.io/name: epiccart
+    app.kubernetes.io/component: backend
+spec:
+  # Maintain exactly 2 healthy Pod replicas for high availability and load balancing
+  replicas: 2
+  # Selector tells the Deployment which Pods belong to it
+  selector:
+    matchLabels:
+      app: epiccart-backend
+  # Pod template: defines how each backend Pod is constructed
+  template:
+    metadata:
+      labels:
+        app: epiccart-backend
+        app.kubernetes.io/name: epiccart
+        app.kubernetes.io/component: backend
+    spec:
+      containers:
+        - name: backend
+          # Container image name built from backend/Dockerfile
+          image: epiccart-backend:latest
+          # Only pull image from a registry if it does not already exist locally
+          imagePullPolicy: IfNotPresent
+          ports:
+            # Expose port 5000 inside the Pod network
+            - containerPort: 5000
+              name: http
+          # Inject all environment variables from our ConfigMap and Secret
+          envFrom:
+            - configMapRef:
+                name: epiccart-backend-config
+            - secretRef:
+                name: epiccart-backend-secret
+          # Resource requests (guaranteed minimum) and limits (hard maximum ceiling)
+          resources:
+            requests:
+              cpu: 100m      # 0.1 CPU core minimum
+              memory: 128Mi  # 128MB RAM minimum
+            limits:
+              cpu: 500m      # 0.5 CPU core maximum
+              memory: 512Mi  # 512MB RAM maximum ceiling
+          # Readiness probe: checks if backend is ready to receive client HTTP traffic
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10 # Wait 10 seconds after container start before first check
+            periodSeconds: 5        # Check every 5 seconds
+            timeoutSeconds: 3       # Probe fails if no response within 3 seconds
+            failureThreshold: 3     # Remove Pod from traffic if 3 checks fail in a row
+          # Liveness probe: restarts the container if the Node.js process deadlocks or crashes
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 20 # Wait 20 seconds for server to fully initialize
+            periodSeconds: 10       # Check every 10 seconds
+            timeoutSeconds: 3
+            failureThreshold: 3

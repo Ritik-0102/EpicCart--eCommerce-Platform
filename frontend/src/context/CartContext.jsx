@@ -1,3 +1,4 @@
+// CartContext: global state for the customer's shopping cart
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { fetchCart, addToCart as apiAddToCart, updateCartItem as apiUpdateCartItem, removeCartItem as apiRemoveCartItem } from '../services/api';
 import { AuthContext } from './AuthContext';
@@ -9,8 +10,10 @@ export const CartProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
+  // Access the authentication token from AuthContext
   const { token, user } = useContext(AuthContext);
 
+  // Automatically fetch cart whenever the user logs in, or clear it if they log out
   useEffect(() => {
     if (token) {
       loadCart();
@@ -19,6 +22,7 @@ export const CartProvider = ({ children }) => {
     }
   }, [token]);
 
+  // Fetch the authoritative cart record from the backend API
   const loadCart = async () => {
     setLoading(true);
     setError(null);
@@ -32,6 +36,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Add a product to the cart with the specified quantity
   const addToCart = async (productId, quantity = 1) => {
     if (!token) {
       setError('Please log in to add items to the cart.');
@@ -51,6 +56,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Modify the quantity of an item already in the cart
   const updateQuantity = async (cartItemId, quantity) => {
     if (quantity < 1) return;
     setLoading(true);
@@ -64,6 +70,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Delete an item from the cart
   const removeFromCart = async (cartItemId) => {
     setLoading(true);
     try {
@@ -76,6 +83,7 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // Compute total number of items in the cart to display in the navbar badge
   const cartItemCount = cart?.items?.reduce((total, item) => total + item.quantity, 0) || 0;
 
   return (

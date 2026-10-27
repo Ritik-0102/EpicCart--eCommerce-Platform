@@ -1,3 +1,4 @@
+// Cart page: displays items currently in the user's shopping bag, subtotal, and checkout CTA
 import React, { useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../context/CartContext';
@@ -9,6 +10,7 @@ const Cart = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // Guard: if user is not logged in, ask them to sign in to access their cart
   if (!user) {
     return (
       <div className="cart-container empty-state">
@@ -19,14 +21,17 @@ const Cart = () => {
     );
   }
 
+  // Display loading state while cart data is fetching from the backend
   if (loading && (!cart || !cart.items)) {
     return <div className="cart-container loading">Loading your cart...</div>;
   }
 
+  // Display error message if the API call failed
   if (error) {
     return <div className="cart-container error">{error}</div>;
   }
 
+  // Empty state when cart contains zero items
   if (!cart || !cart.items || cart.items.length === 0) {
     return (
       <div className="cart-container empty-state">
@@ -42,6 +47,7 @@ const Cart = () => {
       <h2>Your Cart</h2>
       
       <div className="cart-layout">
+        {/* Cart Item List */}
         <div className="cart-items">
           {cart.items.map(item => (
             <div key={item.id} className="cart-item">
@@ -57,19 +63,23 @@ const Cart = () => {
                 </Link>
                 <p className="cart-item-price">₹{Number(item.product.price).toFixed(2)}</p>
                 
+                {/* Quantity increment / decrement buttons */}
                 <div className="cart-item-actions">
                   <div className="quantity-controls">
                     <button 
                       onClick={() => updateQuantity(item.id, item.quantity - 1)}
                       disabled={item.quantity <= 1 || loading}
+                      aria-label="Decrease quantity"
                     >-</button>
                     <span>{item.quantity}</span>
                     <button 
                       onClick={() => updateQuantity(item.id, item.quantity + 1)}
                       disabled={loading}
+                      aria-label="Increase quantity"
                     >+</button>
                   </div>
                   
+                  {/* Remove item from cart button */}
                   <button 
                     onClick={() => removeFromCart(item.id)} 
                     className="btn-remove"
@@ -86,6 +96,7 @@ const Cart = () => {
           ))}
         </div>
         
+        {/* Order Summary & Proceed to Checkout Sidebar */}
         <div className="cart-summary">
           <h3>Order Summary</h3>
           <div className="summary-row">
@@ -101,6 +112,7 @@ const Cart = () => {
             <span>Total</span>
             <span>₹{Number(cart.totalPrice || cart.items.reduce((acc, item) => acc + item.quantity * item.product.price, 0)).toFixed(2)}</span>
           </div>
+          {/* Navigate to checkout screen */}
           <button 
             className="btn btn-primary btn-checkout" 
             disabled={loading}

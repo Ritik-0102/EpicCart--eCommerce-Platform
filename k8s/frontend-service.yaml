@@ -1,0 +1,21 @@
+# Service exposes the frontend Nginx Pods to external web traffic
+apiVersion: v1
+kind: Service
+metadata:
+  name: epiccart-frontend-service
+  labels:
+    app.kubernetes.io/name: epiccart
+    app.kubernetes.io/component: frontend
+spec:
+  # LoadBalancer: requests an external cloud load balancer IP from the cloud provider
+  type: LoadBalancer
+  # Routes incoming connections to Pods labeled "app: epiccart-frontend"
+  selector:
+    app: epiccart-frontend
+  ports:
+    - name: http
+      # Public port exposed to browser users
+      port: 80
+      # Target port on the frontend container running Nginx
+      targetPort: 80
+      protocol: TCP

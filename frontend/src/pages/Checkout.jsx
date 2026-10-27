@@ -1,3 +1,4 @@
+// Checkout page: captures shipping address, calculates coupons, and launches the Razorpay modal
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Lock } from 'lucide-react';
@@ -7,9 +8,10 @@ import { fetchCheckoutSummary, createOrder, initiatePayment, verifyPayment } fro
 import toast from 'react-hot-toast';
 import './Checkout.css';
 
-// Dynamically load Razorpay SDK script
+// Helper function to dynamically append the Razorpay checkout.js script to the DOM
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
+    // If Razorpay SDK is already loaded on window, resolve immediately
     if (window.Razorpay) {
       resolve(true);
       return;
@@ -23,23 +25,27 @@ const loadRazorpayScript = () => {
 };
 
 const Checkout = () => {
+  // Global auth and cart state
   const { user, token } = useContext(AuthContext);
   const { cart, loadCart, loading: cartLoading } = useContext(CartContext);
   const navigate = useNavigate();
 
+  // Shipping address form fields
   const [shippingAddress, setShippingAddress] = useState('');
   const [city, setCity] = useState('');
   const [postalCode, setPostalCode] = useState('');
   const [country, setCountry] = useState('India');
   
+  // Coupon and order calculation state
   const [couponCode, setCouponCode] = useState('');
   const [summary, setSummary] = useState(null);
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Redirect unauthenticated users or users with empty carts
   useEffect(() => {
-    if (cartLoading) return; // Wait for cart to finish loading
+    if (cartLoading) return; // Wait for cart to finish loading from server
 
     if (!user) {
       navigate('/login');
@@ -51,6 +57,7 @@ const Checkout = () => {
     // eslint-disable-next-line
   }, [user, cart, cartLoading]);
 
+  // Request authoritative order totals and discounts from the backend
   const loadSummary = async (code = '') => {
     setLoading(true);
     setError(null);
@@ -67,6 +74,7 @@ const Checkout = () => {
     }
   };
 
+  // Submit entered coupon code to be recalculated
   const handleApplyCoupon = (e) => {
     e.preventDefault();
     if (couponCode.trim()) {
@@ -74,6 +82,7 @@ const Checkout = () => {
     }
   };
 
+  // Handle order creation and payment flow
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
     if (!shippingAddress || !city || !postalCode || !country) {
@@ -85,14 +94,13 @@ const Checkout = () => {
     setError(null);
 
     try {
-      // 1. Ensure Razorpay SDK is loaded
+      // 1. Ensure the Razorpay script is loaded in the browser
       const isScriptLoaded = await loadRazorpayScript();
       if (!isScriptLoaded) {
         throw new Error('Razorpay SDK failed to load. Please check your network or ad blocker.');
       }
 
-      // 2. Authoritatively create order on backend (in PENDING state)
-      // Note: cart is preserved until payment is cryptographically verified
+      // 2. Create the order on the Express backend with initial status "PENDING"
       const orderData = {
         shippingAddress,
         city,
@@ -103,10 +111,10 @@ const Checkout = () => {
       
       const newOrder = await createOrder(orderData, token);
 
-      // 3. Initiate payment with Razorpay on backend
+      // 3. Initiate payment with the backend to receive an authorized Razorpay Order ID
       const rzpOrder = await initiatePayment(newOrder.id, token);
 
-      // 4. Configure and launch the Razorpay Checkout modal directly
+      // 4. Configure Razorpay modal options
       const razorpayKey = rzpOrder.key || import.meta.env.VITE_RAZORPAY_KEY_ID || 'dummy_key';
 
       const options = {
@@ -116,6 +124,7 @@ const Checkout = () => {
         name: 'EpicCart',
         description: `Payment for Order #${newOrder.id}`,
         order_id: rzpOrder.id,
+        // Modal dismiss callback if the customer cancels the payment popup
         modal: {
           ondismiss: function () {
             setLoading(false);
@@ -124,10 +133,11 @@ const Checkout = () => {
             });
           }
         },
+        // Handler callback triggered by Razorpay once payment is authorized by the bank
         handler: async function (response) {
           try {
             setLoading(true);
-            // 5. Verify cryptographic signature on the backend
+            // 5. Send transaction signatures to backend for HMAC-SHA256 verification
             await verifyPayment({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -135,9 +145,10 @@ const Checkout = () => {
               orderId: newOrder.id
             }, token);
 
-            // 6. Reload cart context (which the backend cleared atomically upon verification)
+            // 6. Reload cart context (which the backend cleared atomically upon payment)
             await loadCart();
             toast.success('Payment verified! Order confirmed.');
+            // Navigate to the order details page showing confirmed purchase status
             navigate(`/orders/${newOrder.id}?confirmed=true`);
           } catch (verifyErr) {
             setLoading(false);
@@ -154,8 +165,10 @@ const Checkout = () => {
         }
       };
 
+      // Open the Razorpay checkout popup modal
       const paymentObject = new window.Razorpay(options);
       
+      // Handle payment declined event
       paymentObject.on('payment.failed', function (resp) {
         setLoading(false);
         const failMsg = resp.error?.description || 'Transaction declined by issuer';
@@ -186,6 +199,7 @@ const Checkout = () => {
       {error && <div className="error-message">{error}</div>}
 
       <div className="checkout-layout">
+        {/* Left column: Shipping address form & coupons */}
         <div className="checkout-form-section">
           <h3>1. Delivery Address</h3>
           <form id="checkout-form" onSubmit={handlePlaceOrder}>
@@ -236,6 +250,7 @@ const Checkout = () => {
             </div>
           </form>
 
+          {/* Coupon discount input */}
           <div className="coupon-section">
             <h3>2. Promotional Coupons</h3>
             <form onSubmit={handleApplyCoupon} className="coupon-form">
@@ -258,6 +273,7 @@ const Checkout = () => {
           </div>
         </div>
 
+        {/* Right column: Order item summary & Razorpay payment CTA */}
         <div className="checkout-summary-section">
           <h3>Order Summary</h3>
           <div className="summary-items">
@@ -297,6 +313,7 @@ const Checkout = () => {
             <div className="loading-summary">Calculating totals...</div>
           )}
 
+          {/* Submit button launches the Razorpay modal */}
           <button 
             type="submit" 
             form="checkout-form"

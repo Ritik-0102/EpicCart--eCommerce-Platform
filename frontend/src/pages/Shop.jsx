@@ -1,3 +1,4 @@
+// Shop page: product discovery catalog with multi-facet filtering, search, sorting, and pagination
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { fetchProducts, fetchCategories } from '../services/api';

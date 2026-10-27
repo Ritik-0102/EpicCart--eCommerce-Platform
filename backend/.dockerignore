@@ -1,6 +1,12 @@
+# Ignore local node_modules so we don't accidentally copy host machine binaries into the Linux container
 node_modules
+
+# Never copy local environment files with real secrets into the Docker image
 .env
+
+# Ignore npm debug logs
 npm-debug.log
+
+# Do not copy Docker configuration files into the container image itself
 Dockerfile
 .dockerignore
-

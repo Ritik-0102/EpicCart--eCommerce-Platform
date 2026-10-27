@@ -1,0 +1,34 @@
+# Ingress acts as an L7 HTTP router directing requests by path to backend or frontend
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: epiccart-ingress
+  labels:
+    app.kubernetes.io/name: epiccart
+  annotations:
+    # Allow file uploads up to 10MB (used for product image uploads in the admin portal)
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+spec:
+  # Uses the Nginx Ingress Controller class installed in the cluster
+  ingressClassName: nginx
+  rules:
+    # Host header rule for local or domain-based routing
+    - host: epiccart.local
+      http:
+        paths:
+          # Route all /api/* requests to the internal Express backend Service on port 5000
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: epiccart-backend-service
+                port:
+                  number: 5000
+          # Route all other web traffic (root and React pages) to the frontend Service on port 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: epiccart-frontend-service
+                port:
+                  number: 80

@@ -1,10 +1,10 @@
+// Payment controller handling Razorpay order creation and cryptographic payment verification
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Initialize Razorpay instance
-// In a real application, you'd handle missing keys more gracefully
+// Initialize the official Razorpay SDK client using environment credentials
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || 'dummy_key_id',
   key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_key_secret',
@@ -13,7 +13,7 @@ const razorpay = new Razorpay({
 /**
  * @desc    Initiate a Razorpay payment for an existing order
  * @route   POST /api/payments/initiate
- * @access  Private
+ * @access  Private (Logged-in user)
  */
 const initiatePayment = async (req, res, next) => {
   try {
@@ -23,7 +23,7 @@ const initiatePayment = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Order ID is required' });
     }
 
-    // 1. Find the order and verify it belongs to the user and is PENDING
+    // 1. Find the order and confirm it belongs to the authenticated user and is PENDING
     const order = await prisma.order.findUnique({
       where: { id: parseInt(orderId) }
     });
@@ -32,39 +32,36 @@ const initiatePayment = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Order not found' });
     }
 
+    // Security check: only the user who created the order can pay for it
     if (order.userId !== req.user.id) {
       return res.status(403).json({ success: false, message: 'Not authorized' });
     }
 
+    // Prevent re-initiating payment for already processed orders
     if (order.status !== 'PENDING') {
       return res.status(400).json({ success: false, message: `Order is already ${order.status}` });
     }
 
-    // 2. Prevent duplicate Razorpay orders if one already exists for this order
-    // In test mode, we might just create a new one, but let's be safe.
-    if (order.razorpayOrderId) {
-      // Could optionally return the existing razorpay order details here
-    }
-
-    // 3. Create a Razorpay Order
-    // Razorpay requires amount in smallest currency unit (e.g., paise for INR)
+    // 2. Razorpay expects the amount in the smallest currency unit (paise for INR, where 100 paise = ₹1)
     const amountInSmallestUnit = Math.round(order.total * 100);
 
     const options = {
       amount: amountInSmallestUnit,
       currency: "INR",
       receipt: `receipt_order_${order.id}`,
-      payment_capture: 1 // Auto capture
+      payment_capture: 1 // Automatically capture payment upon successful completion
     };
 
+    // 3. Ask Razorpay's servers to create an authenticated order ID
     const razorpayOrder = await razorpay.orders.create(options);
 
-    // 4. Save the razorpayOrderId to our database
+    // 4. Save the razorpayOrderId on the order record for later verification
     await prisma.order.update({
       where: { id: order.id },
       data: { razorpayOrderId: razorpayOrder.id }
     });
 
+    // Return the generated Razorpay order ID and public key to frontend checkout modal
     res.status(200).json({
       success: true,
       data: {
@@ -77,7 +74,6 @@ const initiatePayment = async (req, res, next) => {
     });
 
   } catch (error) {
-    // Log without exposing sensitive objects directly
     console.error('Razorpay Initiation Error:', error.description || error.message || 'Unknown error');
     res.status(500).json({ 
       success: false, 
@@ -88,34 +84,36 @@ const initiatePayment = async (req, res, next) => {
 };
 
 /**
- * @desc    Verify Razorpay payment signature
+ * @desc    Verify Razorpay payment signature cryptographically
  * @route   POST /api/payments/verify
- * @access  Private
+ * @access  Private (Logged-in user)
  */
 const verifyPayment = async (req, res, next) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderId } = req.body;
 
+    // Validate that all cryptographic parameters were sent
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderId) {
       return res.status(400).json({ success: false, message: 'Missing payment details' });
     }
 
-    // 1. Generate the expected signature
-    // The expected signature is an HMAC hex digest of "razorpay_order_id|razorpay_payment_id"
+    // 1. Generate the expected signature on the server using HMAC-SHA256
+    // Formula: HMAC-SHA256("razorpay_order_id|razorpay_payment_id", RAZORPAY_KEY_SECRET)
     const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || 'dummy_key_secret')
       .update(body.toString())
       .digest('hex');
 
-    // 2. Compare signatures
+    // 2. Compare the server-generated signature against the signature returned by Razorpay
     const isAuthentic = expectedSignature === razorpay_signature;
 
+    // Reject request if signatures do not match (prevents forged payment requests)
     if (!isAuthentic) {
       return res.status(400).json({ success: false, message: 'Invalid payment signature' });
     }
 
-    // 3. Signature is valid, update order status to PAID in a safe transaction
+    // 3. Signature is authentic: execute database updates inside an ACID transaction
     // Product stock is decremented and cart cleared ONLY once payment is cryptographically verified
     const updatedOrder = await prisma.$transaction(async (tx) => {
       const existingOrder = await tx.order.findUnique({
@@ -130,12 +128,12 @@ const verifyPayment = async (req, res, next) => {
         throw new Error('Order not found');
       }
 
-      // Idempotency: if already paid, do not re-decrement stock or re-clear cart
+      // Idempotency check: if order is already marked PAID, return without double-decrementing stock
       if (existingOrder.status === 'PAID') {
         return existingOrder;
       }
 
-      // Update order status and payment IDs
+      // Update order status to PAID and store transaction IDs
       const orderRecord = await tx.order.update({
         where: { id: existingOrder.id },
         data: {
@@ -149,7 +147,7 @@ const verifyPayment = async (req, res, next) => {
         }
       });
 
-      // Decrement product stock
+      // Atomically decrement stock for each purchased item
       for (const item of existingOrder.items) {
         await tx.product.update({
           where: { id: item.productId },
@@ -157,7 +155,7 @@ const verifyPayment = async (req, res, next) => {
         });
       }
 
-      // Clear the user's cart
+      // Clear the user's cart now that the purchase is confirmed
       const userCart = await tx.cart.findUnique({
         where: { userId: existingOrder.userId }
       });
@@ -167,7 +165,7 @@ const verifyPayment = async (req, res, next) => {
         });
       }
 
-      // Increment coupon usage if a coupon was used
+      // Increment coupon usage count if a coupon was used
       if (existingOrder.couponId) {
         await tx.coupon.update({
           where: { id: existingOrder.couponId },
@@ -178,7 +176,7 @@ const verifyPayment = async (req, res, next) => {
       return orderRecord;
     });
 
-    // Send email notification upon verified payment (Fail-safe)
+    // 4. Send order confirmation email via SMTP (fail-safe: email failure won't rollback order)
     try {
       const sendEmail = require('../utils/sendEmail');
       const formattedTotal = Number(updatedOrder.total).toLocaleString('en-IN', {

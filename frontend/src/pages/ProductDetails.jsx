@@ -1,3 +1,4 @@
+// Product details page: displays full specifications, high-res images, stock status, and add-to-cart controls
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { fetchProductById } from '../services/api';
@@ -8,6 +9,7 @@ import toast from 'react-hot-toast';
 import './ProductDetails.css';
 
 const ProductDetails = () => {
+  // Extract product ID from URL parameter (e.g. /products/4)
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
@@ -16,10 +18,12 @@ const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
 
+  // Global context consumers
   const { addToCart } = useContext(CartContext);
   const { addToWishlist, isInWishlist, removeFromWishlist, wishlist } = useContext(WishlistContext);
   const { user } = useContext(AuthContext);
 
+  // Fetch product data whenever the ID in the route changes
   useEffect(() => {
     const loadProduct = async () => {
       try {
@@ -36,6 +40,7 @@ const ProductDetails = () => {
     loadProduct();
   }, [id]);
 
+  // Add the product with the selected quantity to the shopping cart
   const handleAddToCart = async () => {
     if (!user) {
       toast.error('Please log in to add items to your cart.');

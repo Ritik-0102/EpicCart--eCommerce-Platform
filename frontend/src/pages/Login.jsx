@@ -1,31 +1,35 @@
+// Login page: authenticates customer and administrator credentials
 import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { loginUser } from '../services/api';
-import './Auth.css'; // We'll share CSS between Login and Register
+import './Auth.css'; // Shared styles between Login and Register
 
 const Login = () => {
+  // Local form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
+  // Auth state updater from AuthContext
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // Submit login credentials to backend API
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
     try {
-      // Attempt to login using the API service
+      // Send POST request with email and password to /api/auth/login
       const data = await loginUser({ email, password });
       
-      // Save the user (including role) and token to our global AuthContext
+      // Save authenticated user profile and JWT token into React context and localStorage
       login({ id: data.id, name: data.name, email: data.email, role: data.role }, data.token);
       
-      // Redirect to the appropriate dashboard
+      // Redirect based on role: admins go to the admin portal, customers go to account dashboard
       if (data.role === 'ADMIN') {
         navigate('/admin');
       } else {

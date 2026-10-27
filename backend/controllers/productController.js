@@ -1,3 +1,4 @@
+// Product controller handling catalog queries, filtering, and admin product management
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const cloudinary = require('../config/cloudinary');
@@ -6,23 +7,25 @@ const cloudinary = require('../config/cloudinary');
 // @route   GET /api/products
 const getProducts = async (req, res, next) => {
   try {
+    // Extract query parameters from the request URL
     const { category, search, featured, inStock, minPrice, maxPrice, sort, page, limit } = req.query;
 
+    // Build the Prisma "where" filter object dynamically
     const where = {
-      isArchived: false,
+      isArchived: false, // Never return soft-deleted or archived products
     };
 
-    // Filter by featured
+    // Filter to only featured products if requested
     if (featured === 'true') {
       where.isFeatured = true;
     }
 
-    // Filter by inStock
+    // Filter to only products currently in stock
     if (inStock === 'true') {
       where.stock = { gt: 0 };
     }
 
-    // Filter by price range
+    // Filter by price range (minimum and/or maximum price)
     if (minPrice !== undefined || maxPrice !== undefined) {
       where.price = {};
       if (minPrice !== undefined && !isNaN(parseFloat(minPrice))) {
@@ -33,7 +36,7 @@ const getProducts = async (req, res, next) => {
       }
     }
 
-    // Filter by category (ID or name case-insensitive)
+    // Filter by category: handles either numeric category ID or category name string
     if (category) {
       const parsedCatId = parseInt(category);
       if (!isNaN(parsedCatId)) {
@@ -42,13 +45,13 @@ const getProducts = async (req, res, next) => {
         where.category = {
           name: {
             equals: category,
-            mode: 'insensitive'
+            mode: 'insensitive' // Ignore uppercase/lowercase differences
           }
         };
       }
     }
 
-    // Filter by search term
+    // Search query: searches both product name and description case-insensitively
     if (search && search.trim()) {
       const searchTerm = search.trim();
       where.OR = [
@@ -57,8 +60,8 @@ const getProducts = async (req, res, next) => {
       ];
     }
 
-    // Sorting
-    let orderBy = { id: 'desc' }; // default: newest
+    // Determine sort ordering based on the "sort" query param
+    let orderBy = { id: 'desc' }; // Default to newest first
     if (sort === 'price_asc') {
       orderBy = { price: 'asc' };
     } else if (sort === 'price_desc') {
@@ -69,21 +72,23 @@ const getProducts = async (req, res, next) => {
       orderBy = { id: 'desc' };
     }
 
-    // Optional pagination
-    const take = limit ? Math.max(1, parseInt(limit)) : undefined;
-    const skip = page && limit ? Math.max(0, (parseInt(page) - 1) * take) : undefined;
+    // Pagination calculations
+    const take = limit ? Math.max(1, parseInt(limit)) : undefined; // How many items to fetch
+    const skip = page && limit ? Math.max(0, (parseInt(page) - 1) * take) : undefined; // How many to skip
 
+    // Run count and data queries concurrently using Promise.all for faster response times
     const [total, products] = await Promise.all([
       prisma.product.count({ where }),
       prisma.product.findMany({
         where,
-        include: { category: true },
+        include: { category: true }, // Include related category details
         orderBy,
         take,
         skip
       })
     ]);
 
+    // Return the results along with pagination metadata
     res.status(200).json({
       success: true,
       count: products.length,
@@ -106,6 +111,7 @@ const getProductById = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid product ID format' });
     }
 
+    // Query product by unique ID and join its category
     const product = await prisma.product.findUnique({
       where: { id: productId },
       include: { category: true }
@@ -121,7 +127,7 @@ const getProductById = async (req, res, next) => {
   }
 };
 
-// @desc    Create a new product
+// @desc    Create a new product (Admin only)
 // @route   POST /api/products
 const createProduct = async (req, res, next) => {
   try {
@@ -130,7 +136,7 @@ const createProduct = async (req, res, next) => {
       sku, slug, lowStockThreshold, isPublished, isFeatured, isArchived
     } = req.body;
 
-    // Basic Validation
+    // Validate that required fields are present
     if (!name || !description || price === undefined || !categoryId) {
       return res.status(400).json({ 
         success: false, 
@@ -160,6 +166,7 @@ const createProduct = async (req, res, next) => {
       }
     }
 
+    // Create the product record in the database
     const newProduct = await prisma.product.create({
       data: {
         name,
@@ -184,7 +191,7 @@ const createProduct = async (req, res, next) => {
   }
 };
 
-// @desc    Update a product
+// @desc    Update an existing product (Admin only)
 // @route   PUT /api/products/:id
 const updateProduct = async (req, res, next) => {
   try {
@@ -193,7 +200,7 @@ const updateProduct = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid product ID format' });
     }
 
-    // Check if product exists first
+    // Check if the product exists before attempting an update
     const existingProduct = await prisma.product.findUnique({ where: { id: productId } });
     if (!existingProduct) {
       return res.status(404).json({ success: false, message: 'Product not found' });
@@ -220,6 +227,7 @@ const updateProduct = async (req, res, next) => {
       }
     }
 
+    // Update product fields in PostgreSQL
     const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: {
@@ -239,7 +247,7 @@ const updateProduct = async (req, res, next) => {
       }
     });
 
-    // If there is an old Cloudinary image and it's being replaced or removed, delete it ONLY AFTER successful DB update
+    // If an image was replaced, remove the old image asset from Cloudinary storage
     if (
       existingProduct.imagePublicId && 
       ( (imagePublicId !== undefined && imagePublicId !== existingProduct.imagePublicId) || 
@@ -258,7 +266,7 @@ const updateProduct = async (req, res, next) => {
   }
 };
 
-// @desc    Delete a product
+// @desc    Delete a product (Admin only)
 // @route   DELETE /api/products/:id
 const deleteProduct = async (req, res, next) => {
   try {
@@ -267,17 +275,18 @@ const deleteProduct = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid product ID format' });
     }
 
-    // Check if product exists
+    // Verify product exists before deleting
     const existingProduct = await prisma.product.findUnique({ where: { id: productId } });
     if (!existingProduct) {
       return res.status(404).json({ success: false, message: 'Product not found' });
     }
 
+    // Delete the product record
     await prisma.product.delete({
       where: { id: productId }
     });
 
-    // If it has a Cloudinary image, destroy it ONLY AFTER successful DB deletion
+    // Clean up uploaded image from Cloudinary if one exists
     if (existingProduct.imagePublicId) {
       try {
         await cloudinary.uploader.destroy(existingProduct.imagePublicId);

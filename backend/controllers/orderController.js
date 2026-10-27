@@ -1,16 +1,17 @@
+// Order controller handling checkout calculations, order placement, and order history
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 /**
- * @desc    Get checkout summary (subtotal, shipping, discount, total)
+ * @desc    Get checkout summary (subtotal, coupon discount, total calculation)
  * @route   POST /api/orders/checkout-summary
- * @access  Private
+ * @access  Private (Logged-in user)
  */
 const getCheckoutSummary = async (req, res, next) => {
   try {
     const { couponCode } = req.body;
     
-    // 1. Fetch user's cart
+    // 1. Fetch user's cart and join product details to use authoritative database prices
     const cart = await prisma.cart.findUnique({
       where: { userId: req.user.id },
       include: {
@@ -20,6 +21,7 @@ const getCheckoutSummary = async (req, res, next) => {
       }
     });
 
+    // Check if cart has items
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({
         success: false,
@@ -27,13 +29,13 @@ const getCheckoutSummary = async (req, res, next) => {
       });
     }
 
-    // 2. Calculate Subtotal securely using database prices
+    // 2. Calculate subtotal securely from server prices (never trusting client-provided prices)
     let subtotal = 0;
     cart.items.forEach(item => {
       subtotal += item.quantity * item.product.price;
     });
 
-    // 3. Apply Coupon if provided
+    // 3. Validate and apply coupon code if provided
     let discount = 0;
     let validCoupon = null;
 
@@ -42,6 +44,7 @@ const getCheckoutSummary = async (req, res, next) => {
         where: { code: couponCode }
       });
 
+      // Confirm coupon exists and is currently active
       if (coupon && coupon.isActive) {
         validCoupon = coupon;
         if (coupon.isPercentage) {
@@ -50,7 +53,7 @@ const getCheckoutSummary = async (req, res, next) => {
           discount = coupon.discountValue;
         }
         
-        // Ensure discount doesn't exceed subtotal
+        // Ensure discount never exceeds total subtotal
         if (discount > subtotal) {
           discount = subtotal;
         }
@@ -62,7 +65,8 @@ const getCheckoutSummary = async (req, res, next) => {
       }
     }
 
-    const total = subtotal - discount; // Free shipping in this simple implementation
+    // Free standard shipping in this store implementation
+    const total = subtotal - discount;
 
     res.status(200).json({
       success: true,
@@ -80,15 +84,15 @@ const getCheckoutSummary = async (req, res, next) => {
 };
 
 /**
- * @desc    Create a new order from cart
+ * @desc    Create a new order from the current shopping cart
  * @route   POST /api/orders
- * @access  Private
+ * @access  Private (Logged-in user)
  */
 const createOrder = async (req, res, next) => {
   try {
     const { shippingAddress, city, postalCode, country, couponCode } = req.body;
 
-    // 1. Basic validation for address
+    // 1. Basic validation for shipping address fields
     if (!shippingAddress || !city || !postalCode || !country) {
       return res.status(400).json({
         success: false,
@@ -96,7 +100,7 @@ const createOrder = async (req, res, next) => {
       });
     }
 
-    // 2. Fetch cart with items
+    // 2. Fetch the user's cart with items and product records
     const cart = await prisma.cart.findUnique({
       where: { userId: req.user.id },
       include: {
@@ -113,10 +117,10 @@ const createOrder = async (req, res, next) => {
       });
     }
 
-    // 3. Calculate totals securely
+    // 3. Verify stock availability and recalculate subtotal
     let subtotal = 0;
     for (const item of cart.items) {
-      // Validate stock availability
+      // Check if product has enough inventory
       if (item.product.stock < item.quantity) {
         return res.status(400).json({
           success: false,
@@ -126,6 +130,7 @@ const createOrder = async (req, res, next) => {
       subtotal += item.quantity * item.product.price;
     }
 
+    // Calculate coupon discounts
     let discount = 0;
     let couponId = null;
 
@@ -133,6 +138,7 @@ const createOrder = async (req, res, next) => {
       const coupon = await prisma.coupon.findUnique({
         where: { code: couponCode }
       });
+
       if (coupon && coupon.isActive) {
         couponId = coupon.id;
         if (coupon.isPercentage) {
@@ -146,8 +152,9 @@ const createOrder = async (req, res, next) => {
 
     const total = subtotal - discount;
 
-    // 4. Create Order and OrderItems (in PENDING status, awaiting payment verification)
-    // Product stock is decremented and cart cleared ONLY once payment is cryptographically verified
+    // 4. Create the Order with initial status "PENDING" awaiting Razorpay payment verification
+    // Notice: We snapshot the product price and quantity into OrderItem records
+    // Stock is decremented and cart cleared ONLY once payment is cryptographically verified
     const order = await prisma.order.create({
       data: {
         userId: req.user.id,
@@ -164,8 +171,8 @@ const createOrder = async (req, res, next) => {
           create: cart.items.map(item => ({
             productId: item.productId,
             productName: item.product.name,
-            price: item.product.price,     // Snapshot of price
-            quantity: item.quantity        // Snapshot of quantity
+            price: item.product.price,     // Snapshot of price at time of purchase
+            quantity: item.quantity        // Snapshot of purchased quantity
           }))
         }
       },
@@ -186,9 +193,9 @@ const createOrder = async (req, res, next) => {
 };
 
 /**
- * @desc    Get logged in user orders
+ * @desc    Get order history for the logged-in customer
  * @route   GET /api/orders
- * @access  Private
+ * @access  Private (Logged-in user)
  */
 const getMyOrders = async (req, res, next) => {
   try {
@@ -201,6 +208,7 @@ const getMyOrders = async (req, res, next) => {
       ...(includePending === 'true' ? {} : { NOT: { status: 'PENDING' } })
     };
 
+    // Query orders belonging to this user, newest first
     const orders = await prisma.order.findMany({
       where: whereClause,
       orderBy: { createdAt: 'desc' },
@@ -219,14 +227,15 @@ const getMyOrders = async (req, res, next) => {
 };
 
 /**
- * @desc    Get order by ID
+ * @desc    Get details for a specific order by ID
  * @route   GET /api/orders/:id
- * @access  Private
+ * @access  Private (Logged-in user)
  */
 const getOrderById = async (req, res, next) => {
   try {
     const orderId = parseInt(req.params.id);
 
+    // Find order along with line items and applied coupon
     const order = await prisma.order.findUnique({
       where: { id: orderId },
       include: {
@@ -242,7 +251,7 @@ const getOrderById = async (req, res, next) => {
       });
     }
 
-    // Ensure the order belongs to the authenticated user
+    // Security check: ensure customer can only view their own orders
     if (order.userId !== req.user.id) {
       return res.status(403).json({
         success: false,

@@ -1,19 +1,18 @@
+// Express application setup module
+// This file configures middleware, mounts routers, and defines error handlers
 const express = require('express');
 const cors = require('cors');
 
-// Initialize the Express application
+// Initialize the Express app
 const app = express();
 
-// --- MIDDLEWARE ---
-// Enable CORS for all routes (allows frontend to fetch data)
+// Enable CORS so the browser can fetch data across origins
 app.use(cors());
 
-// Middleware to parse incoming JSON requests.
-// Without this, req.body would be undefined when clients send JSON data.
+// Parse incoming requests with JSON payloads into req.body
 app.use(express.json());
 
-
-// --- ROUTE IMPORTS ---
+// Import all route modules
 const categoryRoutes = require('./routes/categoryRoutes');
 const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
@@ -22,11 +21,9 @@ const wishlistRoutes = require('./routes/wishlistRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
-
 const adminRoutes = require('./routes/adminRoutes');
 
-// --- ROUTES ---
-// Mount the category and product routes
+// Mount routes to their API endpoints
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/auth', authRoutes);
@@ -37,8 +34,7 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Health Check Endpoint
-// Purpose: A simple route to verify that our API is up and running.
+// Health check endpoint returning status and current timestamp
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     success: true,
@@ -47,10 +43,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-
-// --- 404 NOT FOUND HANDLER ---
-// If a request makes it past all the routes above and doesn't match any of them,
-// this middleware will catch it and return a 404 error.
+// 404 handler for any requests that did not match an existing route
 app.use((req, res, next) => {
   res.status(404).json({
     success: false,
@@ -58,21 +51,18 @@ app.use((req, res, next) => {
   });
 });
 
-
-// --- CENTRALIZED ERROR HANDLER ---
-// This is a special middleware with 4 arguments (err, req, res, next).
-// Express recognizes it as an error handler. All internal server errors get caught here.
+// Centralized error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack); // Log the error for developers
+  console.error(err.stack);
   
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
     success: false,
     message: err.message || 'Internal Server Error',
-    // We only send the stack trace if we are in development mode to avoid leaking sensitive info
+    // Only share stack traces during development to avoid leaking internal details in production
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
   });
 });
 
-// Export the app instance so it can be used by server.js
+// Export the configured app instance
 module.exports = app;

@@ -1,14 +1,14 @@
-// We use Vite's environment variable syntax to get the base API URL.
-// If it's not defined, we fall back to the local development server URL.
+// API service client: handles all HTTP network requests between the React frontend and Express backend
+// Uses Vite's import.meta.env to pick up VITE_API_URL, falling back to local port 5000 in development
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 /**
- * Reusable function to fetch products from the backend.
- * Throws an error if the response is not ok, which allows components to display error states.
+ * Fetch product catalog with optional query filters (category, search, sorting, price, pagination)
  */
 export const fetchProducts = async (params = null) => {
   try {
     let url = `${API_URL}/products`;
+    // Serialize filter object into URL query string parameters (e.g. ?category=electronics&sort=newest)
     if (params && typeof params === 'object') {
       const sp = new URLSearchParams();
       for (const [k, v] of Object.entries(params)) {
@@ -22,12 +22,12 @@ export const fetchProducts = async (params = null) => {
     const response = await fetch(url);
     const data = await response.json();
     
-    // Check if the API returned an HTTP error (e.g. 500 Internal Server Error)
+    // Check if the server returned an error status code
     if (!response.ok || !data.success) {
       throw new Error(data.message || 'Failed to fetch products');
     }
     
-    return data.data; // Return the actual array of products
+    return data.data; // Return the array of product objects
   } catch (error) {
     console.error('API Error (fetchProducts):', error);
     throw error;

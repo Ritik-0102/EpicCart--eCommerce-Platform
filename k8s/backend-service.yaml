@@ -1,0 +1,22 @@
+# Service provides a stable internal IP and DNS name for the backend Pods
+apiVersion: v1
+kind: Service
+metadata:
+  # Internal DNS name: "epiccart-backend-service"
+  name: epiccart-backend-service
+  labels:
+    app.kubernetes.io/name: epiccart
+    app.kubernetes.io/component: backend
+spec:
+  # ClusterIP: creates an internal-only IP address accessible within the cluster
+  type: ClusterIP
+  # Selector routes incoming traffic to any Pod with matching label "app: epiccart-backend"
+  selector:
+    app: epiccart-backend
+  ports:
+    - name: http
+      # Port exposed by the Service inside the cluster
+      port: 5000
+      # Port on the backend Pod container to forward traffic to
+      targetPort: 5000
+      protocol: TCP
