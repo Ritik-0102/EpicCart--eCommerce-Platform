@@ -1,50 +1,80 @@
 /* ==========================================================================
-   EpicCart - Marketplace Hero Component System
-   Two-Column Balanced Visual Hierarchy (Matches Reference Design)
+   EpicCart - Full-Width Premium Hero Banner
+   Continuous Landing Page Banner with Left Editorial Safe-Zone
    ========================================================================== */
 
-.hero-section {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
-  padding: var(--space-8) 0 var(--space-12);
-  border-bottom: 1px solid var(--color-border);
+.hero-banner {
   position: relative;
+  width: 100%;
+  background-color: #F8F5EE;
+  border-bottom: 1px solid var(--color-border);
   overflow: hidden;
-}
-
-@media (min-width: 1024px) {
-  .hero-section {
-    padding: var(--space-12) 0 var(--space-16);
-  }
-}
-
-.hero-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-8);
-  align-items: center;
+  padding: var(--space-8) 0 var(--space-10);
 }
 
 @media (min-width: 992px) {
-  .hero-container {
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-10);
-    min-height: 480px;
+  .hero-banner {
+    min-height: 560px;
+    padding: var(--space-10) 0;
+    display: flex;
+    align-items: center;
+    background-image: 
+      linear-gradient(
+        90deg,
+        rgba(253, 246, 234, 0.94) 0%,
+        rgba(253, 246, 234, 0.82) 34%,
+        rgba(253, 246, 234, 0) 52%
+      ),
+      url('/images/epiccart-marketplace-hero.png');
+    background-repeat: no-repeat;
+    background-position: right center;
+    background-size: cover;
+  }
+}
+
+@media (min-width: 1440px) {
+  .hero-banner {
+    min-height: 600px;
+    background-position: right center;
+  }
+}
+
+@media (min-width: 1920px) {
+  .hero-banner {
+    min-height: 640px;
+    background-position: right center;
+  }
+}
+
+/* Container */
+.hero-banner__container {
+  width: 100%;
+  max-width: var(--container-max-width, 1400px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--container-padding, 1.5rem);
+  padding-right: var(--container-padding, 1.5rem);
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 992px) {
+  .hero-banner__container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
   }
 }
 
 @media (min-width: 1280px) {
-  .hero-container {
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: var(--space-12);
-    min-height: 520px;
+  .hero-banner__container {
+    padding-left: var(--space-8);
+    padding-right: var(--space-8);
   }
 }
 
-/* ==========================================================================
-   Left Column: Editorial Content & Typography
-   ========================================================================== */
-
-.hero-content {
+/* Left Editorial Content Safe Zone (38%–42% of banner) */
+.hero-banner__content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -52,14 +82,32 @@
   z-index: 2;
 }
 
+@media (min-width: 992px) {
+  .hero-banner__content {
+    max-width: 415px; /* Kept strictly within 38%-42% of banner at 992px-1199px */
+  }
+}
+
+@media (min-width: 1200px) {
+  .hero-banner__content {
+    max-width: 490px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .hero-banner__content {
+    max-width: 540px;
+  }
+}
+
 /* Trust Eyebrow Badge */
-.hero-eyebrow {
+.hero-banner__eyebrow {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   padding: 0.35rem 0.85rem;
   background-color: var(--color-accent-subtle);
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  border: 1px solid rgba(37, 99, 235, 0.22);
   border-radius: var(--radius-full);
   color: var(--color-accent);
   font-size: 0.75rem;
@@ -74,32 +122,43 @@
 }
 
 /* Bold Marketplace Headline */
-.hero-title {
-  font-size: clamp(2.15rem, 3.8vw, 3.75rem);
+.hero-banner__title {
+  font-size: clamp(2.15rem, 3.8vw, 3.65rem);
   font-weight: 900;
-  color: var(--color-primary);
+  color: #0F172A;
   line-height: 1.1;
   letter-spacing: -0.035em;
   margin-bottom: var(--space-4);
-  max-width: 580px;
 }
 
-.hero-title-highlight {
+@media (min-width: 992px) and (max-width: 1279px) {
+  .hero-banner__title {
+    font-size: clamp(2rem, 3.2vw, 2.65rem);
+  }
+}
+
+.hero-banner__highlight {
   color: var(--color-accent);
   position: relative;
 }
 
 /* Supporting Description */
-.hero-description {
-  font-size: clamp(1rem, 1.15vw, 1.125rem);
-  color: var(--color-text-muted);
+.hero-banner__description {
+  font-size: clamp(0.975rem, 1.15vw, 1.125rem);
+  color: #334155;
   line-height: 1.65;
   margin-bottom: var(--space-6);
-  max-width: 520px;
+  max-width: 460px;
 }
 
-/* Action Buttons (CTAs) */
-.hero-actions {
+@media (min-width: 1280px) {
+  .hero-banner__description {
+    max-width: 500px;
+  }
+}
+
+/* Action Buttons */
+.hero-banner__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -109,13 +168,12 @@
 }
 
 @media (min-width: 481px) {
-  .hero-actions {
+  .hero-banner__actions {
     width: auto;
   }
 }
 
-.hero-btn-primary,
-.hero-btn-secondary {
+.hero-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -130,20 +188,20 @@
   white-space: nowrap;
 }
 
-.hero-btn-primary:focus-visible,
-.hero-btn-secondary:focus-visible {
+.hero-btn:focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
 }
 
-.hero-btn-primary {
+/* Primary CTA: Shop Now */
+.hero-btn--primary {
   background-color: var(--color-accent);
   color: #FFFFFF;
   border: 1px solid var(--color-accent);
   box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
 }
 
-.hero-btn-primary:hover {
+.hero-btn--primary:hover {
   background-color: var(--color-accent-hover);
   border-color: var(--color-accent-hover);
   color: #FFFFFF;
@@ -151,50 +209,52 @@
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
 }
 
-.hero-btn-secondary {
-  background-color: #FFFFFF;
+/* Secondary CTA: Explore Categories */
+.hero-btn--secondary {
+  background-color: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
   color: var(--color-text-main);
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(203, 213, 225, 0.95);
   box-shadow: var(--shadow-sm);
 }
 
-.hero-btn-secondary:hover {
-  background-color: var(--color-bg-subtle);
+.hero-btn--secondary:hover {
+  background-color: #FFFFFF;
   border-color: var(--color-accent);
   color: var(--color-accent);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 
 @media (max-width: 480px) {
-  .hero-actions {
+  .hero-banner__actions {
     flex-direction: column;
     width: 100%;
   }
 
-  .hero-btn-primary,
-  .hero-btn-secondary {
+  .hero-btn {
     width: 100%;
   }
 }
 
 /* Trust-Benefits Row */
-.hero-trust-row {
+.hero-banner__trust {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-4) var(--space-6);
+  gap: var(--space-4) var(--space-5);
   padding-top: var(--space-5);
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid rgba(15, 23, 42, 0.12);
   width: 100%;
 }
 
 .trust-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-text-main);
+  color: #1E293B;
 }
 
 .trust-icon {
@@ -203,7 +263,7 @@
 }
 
 @media (max-width: 480px) {
-  .hero-trust-row {
+  .hero-banner__trust {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem 0.5rem;
@@ -214,59 +274,33 @@
   }
 }
 
-/* ==========================================================================
-   Right Column: Visual Merchandising Showcase
-   ========================================================================== */
-
-.hero-visual {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-}
-
-.hero-image-frame {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  box-shadow: 0 12px 32px -4px rgba(15, 23, 42, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.06);
-  border: 1px solid var(--color-border);
-  background-color: #FDF6EC;
-}
-
-@media (min-width: 1440px) {
-  .hero-image-frame {
-    aspect-ratio: 16 / 9.5;
-  }
-}
-
-@media (max-width: 768px) {
-  .hero-image-frame {
-    aspect-ratio: 16 / 9;
-  }
-}
-
-.hero-main-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: 85% center;
+/* Mobile & Tablet Visual (Below content on < 992px screens) */
+.hero-banner__mobile-visual {
   display: block;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 100%;
+  margin-top: var(--space-8);
 }
 
-.hero-image-frame:hover .hero-main-img {
-  transform: scale(1.02);
+@media (min-width: 992px) {
+  .hero-banner__mobile-visual {
+    display: none; /* Hidden on desktop: image renders as the full-width background */
+  }
+}
+
+.hero-banner__mobile-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1672 / 941;
+  object-fit: cover;
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.1), 0 2px 6px -1px rgba(15, 23, 42, 0.05);
+  display: block;
 }
 
 /* Reduced Motion */
 @media (prefers-reduced-motion: reduce) {
-  .hero-btn-primary,
-  .hero-btn-secondary,
-  .hero-main-img {
+  .hero-btn {
     transition: none;
     transform: none !important;
   }

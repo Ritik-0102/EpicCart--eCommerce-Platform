@@ -14,70 +14,68 @@ const Hero = () => {
   };
 
   return (
-    <section className="hero-section" aria-label="Everything You Love, All in One Place">
-      <div className="container hero-container">
-        {/* Left Column: Editorial Content & Value Proposition */}
-        <div className="hero-content">
-          <div className="hero-eyebrow">
-            <ShieldCheck size={14} className="eyebrow-icon" />
+    <section className="hero-banner" aria-label="Everything You Love, All in One Place">
+      <div className="hero-banner__container">
+        {/* Left-Side Safe Content Block (38%-42% of banner) */}
+        <div className="hero-banner__content">
+          <div className="hero-banner__eyebrow">
+            <ShieldCheck size={14} className="eyebrow-icon" aria-hidden="true" />
             <span>India’s Trusted Online Marketplace</span>
           </div>
 
-          <h1 className="hero-title">
+          <h1 className="hero-banner__title">
             Everything You Love,<br className="hero-title-br" />
-            <span className="hero-title-highlight">All in One Place.</span>
+            <span className="hero-banner__highlight">All in One Place.</span>
           </h1>
 
-          <p className="hero-description">
+          <p className="hero-banner__description">
             From the latest tech to everyday essentials, trendy fashion to home needs — shop more, worry less with EpicCart.
           </p>
 
-          <div className="hero-actions">
-            <Link to="/products" className="btn btn-primary hero-btn-primary">
+          <div className="hero-banner__actions">
+            <Link to="/products" className="hero-btn hero-btn--primary">
               <span>Shop Now</span>
-              <ArrowRight size={18} />
+              <ArrowRight size={18} aria-hidden="true" />
             </Link>
             <a 
               href="#categories" 
               onClick={handleScrollToCategories} 
-              className="btn btn-outline hero-btn-secondary"
+              className="hero-btn hero-btn--secondary"
             >
               <span>Explore Categories</span>
             </a>
           </div>
 
           {/* Compact Trust-Benefits Row */}
-          <div className="hero-trust-row">
+          <div className="hero-banner__trust">
             <div className="trust-item">
-              <ShieldCheck size={16} className="trust-icon" />
+              <ShieldCheck size={15} className="trust-icon" aria-hidden="true" />
               <span>Authentic Products</span>
             </div>
             <div className="trust-item">
-              <Truck size={16} className="trust-icon" />
+              <Truck size={15} className="trust-icon" aria-hidden="true" />
               <span>Fast Delivery</span>
             </div>
             <div className="trust-item">
-              <RotateCcw size={16} className="trust-icon" />
+              <RotateCcw size={15} className="trust-icon" aria-hidden="true" />
               <span>Easy Returns</span>
             </div>
             <div className="trust-item">
-              <Lock size={16} className="trust-icon" />
+              <Lock size={15} className="trust-icon" aria-hidden="true" />
               <span>Secure Payments</span>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Visual Merchandising Showcase */}
-        <div className="hero-visual">
-          <div className="hero-image-frame">
-            <img 
-              src="/images/epiccart-marketplace-hero.png" 
-              alt="EpicCart Marketplace — Multi-Category Collection"
-              className="hero-main-img"
-              loading="eager"
-              fetchPriority="high"
-            />
-          </div>
+        {/* Mobile & Tablet Visual (Stacked below content on < 992px viewports) */}
+        <div className="hero-banner__mobile-visual" aria-hidden="true">
+          <img 
+            src="/images/epiccart-marketplace-hero.png" 
+            alt=""
+            className="hero-banner__mobile-image"
+            loading="eager"
+            fetchPriority="high"
+          />
         </div>
       </div>
     </section>
