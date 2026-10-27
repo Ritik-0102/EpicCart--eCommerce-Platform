@@ -24,8 +24,8 @@ const Hero = () => {
           </div>
 
           <h1 className="hero-banner__title">
-            Everything You Love,<br className="hero-title-br" />
-            <span className="hero-banner__highlight">All in One Place.</span>
+            <span className="hero-title-line">Everything You Love,</span>
+            <span className="hero-title-line hero-banner__highlight">All in One Place.</span>
           </h1>
 
           <p className="hero-banner__description">
